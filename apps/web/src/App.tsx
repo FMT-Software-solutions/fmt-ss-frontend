@@ -6,6 +6,8 @@ import ItemDetailsPage from "./pages/ItemDetailsPage"
 import CheckoutPage from "./pages/CheckoutPage"
 import RequestQuotePage from "./pages/RequestQuotePage"
 import AboutPage from "./pages/AboutPage"
+import ReviewPage from "./pages/ReviewPage"
+import UnsubscribePage from "./pages/UnsubscribePage"
 
 const router = createBrowserRouter([
   {
@@ -35,6 +37,14 @@ const router = createBrowserRouter([
       {
         path: "about",
         element: <AboutPage />,
+      },
+      {
+        path: "reviews",
+        element: <ReviewPage />,
+      },
+      {
+        path: "newsletter/unsubscribe",
+        element: <UnsubscribePage />,
       },
       // Add placeholders for other static pages
       {

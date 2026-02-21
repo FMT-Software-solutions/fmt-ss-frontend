@@ -10,6 +10,10 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
       "@ui": path.resolve(__dirname, "../../packages/ui/src"),
+      "react": path.resolve(__dirname, "./node_modules/react"),
+      "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
+      "next-themes": path.resolve(__dirname, "./node_modules/next-themes"),
     },
   },
+  envDir: '../../',
 })

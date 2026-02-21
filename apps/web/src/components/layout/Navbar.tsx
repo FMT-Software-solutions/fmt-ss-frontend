@@ -9,10 +9,10 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/60 backdrop-blur-xl supports-backdrop-filter:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
-          <span className="text-xl font-bold">FMT Software</span>
+          <img src="/fmt-logo_.png" alt="FMT Software" className="h-10 w-auto" />
         </Link>
 
         {/* Desktop Menu */}
@@ -42,7 +42,7 @@ export function Navbar() {
 
         {/* Mobile Menu Toggle */}
         <div className="flex items-center md:hidden">
-            <Button
+          <Button
             variant="ghost"
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -83,7 +83,7 @@ export function Navbar() {
             >
               Request Quote
             </Link>
-             <Button asChild className="w-full">
+            <Button asChild className="w-full">
               <Link to="/marketplace" onClick={() => setIsOpen(false)}>Get Started</Link>
             </Button>
           </div>
