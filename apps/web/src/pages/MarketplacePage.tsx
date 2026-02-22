@@ -1,121 +1,223 @@
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Badge, Separator } from "@repo/ui"
-import { Search, Filter } from "lucide-react"
-import { useState } from "react"
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Badge, Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@repo/ui"
+import { Search, Filter, Loader2 } from "lucide-react"
+import { useState, useMemo } from "react"
 import { Link } from "react-router-dom"
-
-// Mock Data
-const softwareItems = Array.from({ length: 12 }).map((_, i) => ({
-  id: i + 1,
-  title: `Software Product ${i + 1}`,
-  description: "A powerful tool for managing your business operations efficiently.",
-  price: 99 + i * 10,
-  category: i % 3 === 0 ? "Business" : i % 3 === 1 ? "Utility" : "Design",
-  rating: 4.5,
-  image: "https://placehold.co/600x400/e2e8f0/1e293b?text=Software+Preview"
-}))
-
-const categories = ["All", "Business", "Utility", "Design", "Development", "Marketing"]
+import { useAllApps } from "@/hooks/queries/useAllApps"
+import { useSectors } from "@/hooks/queries/useSectors"
+import { FilterSidebar } from "@/components/marketplace/FilterSidebar"
 
 export default function MarketplacePage() {
-  const [selectedCategory, setSelectedCategory] = useState("All")
-  const [searchQuery, setSearchQuery] = useState("")
+  const { data: apps = [], isLoading: isLoadingApps } = useAllApps()
+  const { data: sectors = [], isLoading: isLoadingSectors } = useSectors()
 
-  const filteredItems = softwareItems.filter(item => {
-    const matchesCategory = selectedCategory === "All" || item.category === selectedCategory
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesCategory && matchesSearch
-  })
+  // Filter State
+  const [selectedSector, setSelectedSector] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000])
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+
+  // Memoized Filter Logic
+  const filteredApps = useMemo(() => {
+    return apps.filter(app => {
+      // 1. Search Filter
+      const matchesSearch = app.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.shortDescription?.toLowerCase().includes(searchQuery.toLowerCase())
+
+      // 2. Sector Filter
+      const matchesSector = selectedSector
+        ? app.sectors?.some((s: any) => s.slug === selectedSector)
+        : true
+
+      // 3. Price Filter
+      // Handle free apps and promotion prices
+      const effectivePrice = app.isFree ? 0 : (
+        (app.promotion?.hasPromotion && app.promotion?.isActive)
+          ? (app.promotion.discountPrice ?? app.price)
+          : app.price
+      )
+
+      const matchesPrice = effectivePrice >= priceRange[0] && effectivePrice <= priceRange[1]
+
+      return matchesSearch && matchesSector && matchesPrice
+    })
+  }, [apps, searchQuery, selectedSector, priceRange])
+
+  // Reset all filters
+  const clearFilters = () => {
+    setSelectedSector(null)
+    setSearchQuery("")
+    setPriceRange([0, 10000])
+  }
+
+  const activeFiltersCount = (selectedSector ? 1 : 0) + (searchQuery ? 1 : 0) + (priceRange[0] > 0 || priceRange[1] < 10000 ? 1 : 0)
+
+  if (isLoadingApps || isLoadingSectors) {
+    return (
+      <div className="container py-24 flex justify-center items-center min-h-[50vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
   return (
-    <div className="container py-12">
+    <div className="container py-12 min-h-screen">
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold mb-2">Software Marketplace</h1>
-          <p className="text-muted-foreground">Discover premium tools to accelerate your workflow.</p>
+          <p className="text-sm text-muted-foreground">Discover premium tools to accelerate your workflow.</p>
         </div>
-        
+
         <div className="flex items-center gap-2 w-full md:w-auto">
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search software..." 
-              className="pl-8" 
+          <div className="relative w-full md:w-72 hidden md:block">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search software..."
+              className="pl-9"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button variant="outline" size="icon" className="md:hidden">
-            <Filter className="h-4 w-4" />
-          </Button>
+
+          {/* Mobile Filter Sheet */}
+          <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" className="md:hidden w-full flex gap-2">
+                <Filter className="h-4 w-4" />
+                Filters
+                {activeFiltersCount > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center">
+                    {activeFiltersCount}
+                  </Badge>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-75 sm:w-100 overflow-y-auto">
+              <SheetHeader className="mb-6">
+                <SheetTitle>Filters</SheetTitle>
+              </SheetHeader>
+              <FilterSidebar
+                sectors={sectors}
+                selectedSector={selectedSector}
+                onSectorChange={setSelectedSector}
+                priceRange={priceRange}
+                onPriceChange={setPriceRange}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+              />
+              <div className="mt-8 pt-4 border-t sticky bottom-0 bg-background pb-4">
+                <Button className="w-full" onClick={() => setIsFilterOpen(false)}>
+                  Show {filteredApps.length} Results
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-        {/* Sidebar Filters */}
-        <aside className="hidden md:block space-y-6">
-          <div>
-            <h3 className="font-semibold mb-4">Categories</h3>
-            <div className="space-y-2">
-              {categories.map((category) => (
-                <Button
-                  key={category}
-                  variant={selectedCategory === category ? "secondary" : "ghost"}
-                  className="w-full justify-start"
-                  onClick={() => setSelectedCategory(category)}
-                >
-                  {category}
-                </Button>
-              ))}
-            </div>
-          </div>
-          <Separator />
-          <div>
-            <h3 className="font-semibold mb-4">Price Range</h3>
-             {/* Mock Price Filter */}
-             <div className="space-y-2 text-sm text-muted-foreground">
-                <p>Coming soon...</p>
-             </div>
-          </div>
+        {/* Desktop Sidebar */}
+        <aside className="hidden md:block sticky top-24 h-fit">
+          <FilterSidebar
+            sectors={sectors}
+            selectedSector={selectedSector}
+            onSectorChange={setSelectedSector}
+            priceRange={priceRange}
+            onPriceChange={setPriceRange}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
         </aside>
 
         {/* Product Grid */}
         <div className="md:col-span-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredItems.map((item) => (
-              <Card key={item.id} className="overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow">
-                <div className="aspect-video bg-muted relative">
-                    <img 
-                        src={item.image} 
-                        alt={item.title} 
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                    />
-                    <Badge className="absolute top-2 right-2 bg-background/80 text-foreground backdrop-blur-sm hover:bg-background/80">
-                        {item.category}
-                    </Badge>
-                </div>
-                <CardHeader className="p-4">
-                  <CardTitle className="text-lg line-clamp-1">{item.title}</CardTitle>
-                  <CardDescription className="line-clamp-2 text-sm mt-1">{item.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="p-4 pt-0 mt-auto">
-                  <div className="flex items-center justify-between mt-4">
-                    <span className="text-xl font-bold">${item.price}</span>
-                    <Button size="sm" asChild>
-                      <Link to={`/item/${item.id}`}>View Details</Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          
-          {filteredItems.length === 0 && (
-            <div className="text-center py-20">
-                <p className="text-muted-foreground text-lg">No software found matching your criteria.</p>
-                <Button variant="link" onClick={() => {setSelectedCategory("All"); setSearchQuery("")}}>
-                    Clear Filters
-                </Button>
+          {filteredApps.length === 0 ? (
+            <div className="text-center py-16 border rounded-lg bg-muted/20">
+              <h3 className="text-lg font-semibold mb-2">No apps found</h3>
+              <p className="text-muted-foreground mb-6">Try adjusting your search or filters to find what you're looking for.</p>
+              <Button onClick={clearFilters} variant="outline">
+                Clear all filters
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredApps.map((app) => {
+                const hasActivePromotion = app.promotion?.hasPromotion && app.promotion?.isActive;
+                const displayPrice = hasActivePromotion ? app.promotion?.discountPrice : app.price;
+
+                return (
+                  <Link key={app._id} to={`/marketplace/${app.slug}`} className="group h-full">
+                    <Card className="overflow-hidden flex flex-col h-full hover:shadow-lg transition-all duration-300 border-transparent hover:border-primary/20">
+                      <div className="aspect-video bg-muted relative overflow-hidden">
+                        {app.mainImage ? (
+                          <img
+                            src={app.mainImage}
+                            alt={app.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-secondary text-secondary-foreground">
+                            <span className="text-sm font-medium">No Image</span>
+                          </div>
+                        )}
+
+                        {/* Badges */}
+                        <div className="absolute top-2 right-2 flex flex-col gap-2 items-end">
+                          {app.sectors?.slice(0, 1).map((sector: any) => (
+                            <Badge key={sector._id} className="bg-background/90 text-foreground backdrop-blur-sm shadow-sm hover:bg-background">
+                              {sector.name}
+                            </Badge>
+                          ))}
+                        </div>
+
+                        {hasActivePromotion && (
+                          <div className="absolute top-2 left-2">
+                            <Badge variant="destructive" className="animate-pulse">
+                              Sale
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+
+                      <CardHeader className="p-4 pb-2">
+                        <div className="flex justify-between items-start gap-2">
+                          <CardTitle className="text-lg line-clamp-1 group-hover:text-primary transition-colors">
+                            {app.title}
+                          </CardTitle>
+                        </div>
+                        <CardDescription className="line-clamp-2 text-sm mt-1 min-h-10">
+                          {app.shortDescription}
+                        </CardDescription>
+                      </CardHeader>
+
+                      <CardContent className="p-4 pt-0 mt-auto">
+                        <div className="flex items-center justify-between pt-4 border-t mt-2">
+                          <div className="flex flex-col">
+                            {app.isFree ? (
+                              <span className="font-bold text-lg text-green-600">Free</span>
+                            ) : (
+                              <div className="flex items-baseline gap-2">
+                                <span className="font-bold text-lg">
+                                  GHS{displayPrice}
+                                </span>
+                                {hasActivePromotion && (
+                                  <span className="text-sm text-muted-foreground line-through">
+                                    GHS{app.price}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <Button size="sm" variant="secondary" className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                            View Details
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                )
+              })}
             </div>
           )}
         </div>

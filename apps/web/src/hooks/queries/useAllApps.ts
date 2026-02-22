@@ -1,15 +1,35 @@
 import { useQuery } from '@tanstack/react-query';
 import { client, groq } from '@/lib/sanity';
+import type { IPremiumApp } from '@/types/premium-app';
 
-interface AppListItem {
-  _id: string;
-  title: string;
+export interface FilterParams {
+  search?: string;
+  sector?: string;
+  minPrice?: number;
+  maxPrice?: number;
 }
 
 const allAppsQuery = groq`
   *[_type == "premiumApp" && isPublished == true] | order(title asc) {
     _id,
-    title
+    title,
+    "slug": slug.current,
+    price,
+    isFree,
+    shortDescription,
+    "mainImage": mainImage.asset->url,
+    "sectors": sectors[]->{
+      _id,
+      name,
+      "slug": slug.current
+    },
+    promotion {
+      hasPromotion,
+      discountPrice,
+      startDate,
+      endDate,
+      isActive
+    }
   }
 `;
 
@@ -17,7 +37,7 @@ export function useAllApps() {
   return useQuery({
     queryKey: ['allApps'],
     queryFn: async () => {
-      const data = await client.fetch<AppListItem[]>(allAppsQuery);
+      const data = await client.fetch<IPremiumApp[]>(allAppsQuery);
       return data || [];
     },
   });
