@@ -8,6 +8,9 @@ import RequestQuotePage from "./pages/RequestQuotePage"
 import AboutPage from "./pages/AboutPage"
 import ReviewPage from "./pages/ReviewPage"
 import UnsubscribePage from "./pages/UnsubscribePage"
+import ContactPage from "./pages/ContactPage"
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage"
+import TermsOfUsePage from "./pages/TermsOfUsePage"
 
 const router = createBrowserRouter([
   {
@@ -46,18 +49,17 @@ const router = createBrowserRouter([
         path: "newsletter/unsubscribe",
         element: <UnsubscribePage />,
       },
-      // Add placeholders for other static pages
       {
         path: "contact",
-        element: <div className="container py-20">Contact Page (Coming Soon)</div>,
+        element: <ContactPage />,
       },
       {
         path: "privacy",
-        element: <div className="container py-20">Privacy Policy (Coming Soon)</div>,
+        element: <PrivacyPolicyPage />,
       },
       {
         path: "terms",
-        element: <div className="container py-20">Terms of Use (Coming Soon)</div>,
+        element: <TermsOfUsePage />,
       },
     ],
   },

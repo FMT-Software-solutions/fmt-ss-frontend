@@ -11,4 +11,6 @@ export const API_ENDPOINTS = {
         featured: `${API_BASE_URL}/reviews/featured`,
     },
     testimonials: `${API_BASE_URL}/testimonials`,
+    quotes: `${API_BASE_URL}/quotes`,
+    contact: `${API_BASE_URL}/contact`,
 } as const;
