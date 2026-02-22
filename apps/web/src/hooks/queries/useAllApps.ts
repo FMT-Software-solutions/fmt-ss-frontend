@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { client } from '@/lib/sanity';
-import groq from 'groq';
+import { client, groq } from '@/lib/sanity';
 
 interface AppListItem {
   _id: string;
@@ -18,13 +17,8 @@ export function useAllApps() {
   return useQuery({
     queryKey: ['allApps'],
     queryFn: async () => {
-      if (!import.meta.env.VITE_SANITY_PROJECT_ID) {
-        return [];
-      }
-      
       const data = await client.fetch<AppListItem[]>(allAppsQuery);
       return data || [];
     },
-    enabled: !!import.meta.env.VITE_SANITY_PROJECT_ID,
   });
 }

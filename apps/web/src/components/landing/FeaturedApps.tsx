@@ -16,11 +16,13 @@ import { useFeaturedApps } from '@/hooks/queries/useFeaturedApps';
 export function FeaturedApps() {
   const { data: apps = [], isLoading, error } = useFeaturedApps();
 
+  console.log('apps', apps);
+
   return (
     <section className="py-20 bg-muted/30">
       <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
-          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl max-w-150">Software Solutions That Fit Your Business Needs</h2>
+          <h2 className="text-2xl font-bold tracking-tighter sm:text-4xl max-w-90 sm:max-w-150">Software Solutions That Fit Your Business Needs</h2>
         </div>
 
         {error && (
@@ -81,7 +83,7 @@ function PremiumAppCard({
 
 
 
-  const imageUrl = urlFor(mainImage).url();
+  const imageUrl = urlFor(mainImage)?.url() || '';
 
   return (
     <motion.div
@@ -94,10 +96,8 @@ function PremiumAppCard({
         <CardHeader className="pb-4">
           <div className="flex justify-between items-start gap-2">
             <CardTitle className="line-clamp-1 text-xl">{title}</CardTitle>
-            {promotion?.hasPromotion && promotion?.isActive ? (
+            {promotion?.hasPromotion && promotion?.isActive && (
               <Badge className="bg-green-600 hover:bg-green-700 shrink-0">Promo</Badge>
-            ) : (
-              <Badge variant="outline" className="shrink-0">Premium</Badge>
             )}
           </div>
           <CardDescription className="line-clamp-2 h-10">{shortDescription}</CardDescription>

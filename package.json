@@ -5,9 +5,11 @@
         "build": "turbo run build",
         "build:web": "turbo run build --filter=web",
         "build:admin": "turbo run build --filter=admin",
+        "build:studio": "turbo run build --filter=studio",
         "dev": "turbo run dev",
         "web": "turbo run dev --filter=web",
         "admin": "turbo run dev --filter=admin",
+        "studio": "turbo run dev --filter=studio",
         "lint": "turbo run lint",
         "clean": "turbo run clean",
         "format": "prettier --write \"**/*.{ts,tsx,md}\""

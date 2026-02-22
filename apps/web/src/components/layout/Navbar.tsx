@@ -17,27 +17,23 @@ export function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex md:items-center md:space-x-6">
-          <Link to="/" className="text-sm font-medium transition-colors hover:text-primary">
-            Home
-          </Link>
-          <Link to="/marketplace" className="text-sm font-medium transition-colors hover:text-primary">
-            Marketplace
-          </Link>
           <Link to="/request-quote" className="text-sm font-medium transition-colors hover:text-primary">
             Request Quote
           </Link>
+          <Button asChild>
+            <Link to="/marketplace">Software Marketplace</Link>
+          </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="rounded-full"
           >
             <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
             <span className="sr-only">Toggle theme</span>
           </Button>
-          <Button asChild>
-            <Link to="/marketplace">Get Started</Link>
-          </Button>
+
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -63,20 +59,6 @@ export function Navbar() {
         <div className="container md:hidden pb-4">
           <div className="flex flex-col space-y-4 mt-4">
             <Link
-              to="/"
-              className="text-sm font-medium transition-colors hover:text-primary"
-              onClick={() => setIsOpen(false)}
-            >
-              Home
-            </Link>
-            <Link
-              to="/marketplace"
-              className="text-sm font-medium transition-colors hover:text-primary"
-              onClick={() => setIsOpen(false)}
-            >
-              Marketplace
-            </Link>
-            <Link
               to="/request-quote"
               className="text-sm font-medium transition-colors hover:text-primary"
               onClick={() => setIsOpen(false)}
@@ -84,7 +66,7 @@ export function Navbar() {
               Request Quote
             </Link>
             <Button asChild className="w-full">
-              <Link to="/marketplace" onClick={() => setIsOpen(false)}>Get Started</Link>
+              <Link to="/marketplace" onClick={() => setIsOpen(false)}>Software Marketplace</Link>
             </Button>
           </div>
         </div>

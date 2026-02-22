@@ -46,7 +46,7 @@ export function MobileAppsSection() {
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-linear-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
                 Mobile-First Experiences
               </h2>
-              <p className="text-lg text-muted-foreground leading-relaxed">
+              <p className="text-sm md:text-lg  text-muted-foreground leading-relaxed">
                 Create engaging mobile applications that connect with your users
                 wherever they are. From concept to app store, we deliver
                 solutions that drive engagement and growth.

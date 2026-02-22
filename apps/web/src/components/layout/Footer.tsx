@@ -9,7 +9,7 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="text-lg font-bold">FMT Software</h3>
             <p className="text-sm text-muted-foreground">
-              Providing top-notch software solutions, website building, and maintenance for your business needs.
+              Providing all kinds of software or website solutions, for your business/organization needs.
             </p>
           </div>
           <div>

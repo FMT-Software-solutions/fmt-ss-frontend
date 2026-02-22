@@ -120,7 +120,7 @@ export function DesktopAppsSection() {
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-linear-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
                 Powerful Desktop Solutions
               </h2>
-              <p className="text-lg text-muted-foreground leading-relaxed">
+              <p className="text-sm md:text-lg  text-muted-foreground leading-relaxed">
                 Build robust desktop applications that leverage the full power
                 of modern operating systems. Our solutions deliver native
                 performance with beautiful, intuitive interfaces.
