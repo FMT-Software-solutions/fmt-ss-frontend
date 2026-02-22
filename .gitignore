@@ -13,6 +13,9 @@ out
 # Vite
 dist-ssr
 
+# Sanity Studio
+.sanity
+
 # Misc
 .DS_Store
 *.pem
