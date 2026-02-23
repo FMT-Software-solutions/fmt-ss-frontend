@@ -1,6 +1,7 @@
 import { Button, Input, Slider, Label } from "@repo/ui"
 import { Search } from "lucide-react"
 import type { Sector } from "@/hooks/queries/useSectors"
+import { SortSelect } from "./SortSelect"
 
 interface FilterSidebarProps {
   sectors: Sector[];
@@ -10,6 +11,8 @@ interface FilterSidebarProps {
   onPriceChange: (value: [number, number]) => void;
   searchQuery: string;
   onSearchChange: (value: string) => void;
+  sortBy?: string;
+  onSortChange?: (value: string) => void;
   className?: string;
   maxPrice?: number;
 }
@@ -22,23 +25,34 @@ export function FilterSidebar({
   onPriceChange,
   searchQuery,
   onSearchChange,
+  sortBy,
+  onSortChange,
   className = "",
   maxPrice = 20000
 }: FilterSidebarProps) {
   return (
     <div className={`space-y-8 ${className}`}>
-      {/* Search - Mobile only (Desktop uses header search) */}
-      <div className="block md:hidden">
-        <Label className="mb-2 block">Search</Label>
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search apps..."
-            className="pl-9"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-          />
+      {/* Search and Sort - Mobile only (Desktop uses header search) */}
+      <div className="block md:hidden space-y-4">
+        <div>
+          <Label className="mb-2 block">Search</Label>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search apps..."
+              className="pl-9"
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+            />
+          </div>
         </div>
+
+        {sortBy && onSortChange && (
+          <div>
+            <Label className="mb-2 block">Sort By</Label>
+            <SortSelect value={sortBy} onValueChange={onSortChange} />
+          </div>
+        )}
       </div>
 
       {/* Sectors */}

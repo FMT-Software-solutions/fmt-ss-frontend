@@ -42,11 +42,19 @@ export default defineType({
       validation: (Rule) => Rule.required().positive(),
     }),
     defineField({
+      name: 'requiresAccount',
+      title: 'Requires Account',
+      type: 'boolean',
+      initialValue: true,
+      description: 'If enabled, users must create an account/sign in to access the app (even if free)',
+    }),
+    defineField({
       name: 'allowMultipleOrganizationPerUser',
       title: 'Allow Multiple Organizations Per User',
       type: 'boolean',
       initialValue: false,
       description: 'If enabled, a user can create/own multiple organizations for this app',
+      hidden: ({ parent }) => !parent?.requiresAccount,
     }),
     defineField({
       name: 'hasTrialUsage',
@@ -54,6 +62,7 @@ export default defineType({
       type: 'boolean',
       initialValue: false,
       description: 'If enabled, users can start a free trial',
+      hidden: ({ parent }) => !parent?.requiresAccount,
     }),
     defineField({
       name: 'isFree',
@@ -355,6 +364,7 @@ export default defineType({
       title: 'App Provisioning Configuration',
       type: 'object',
       description: 'Configuration for user/organization provisioning after purchase',
+      hidden: ({ parent }) => !parent?.requiresAccount,
       fields: [
         defineField({
           name: 'supabaseUrl',

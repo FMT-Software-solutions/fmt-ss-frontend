@@ -106,6 +106,7 @@ export interface IPremiumApp {
     allowMultipleOrganizationPerUser?: boolean;
     hasTrialUsage?: boolean;
     isFree?: boolean;
+    requiresAccount?: boolean;
     mainImage: any;
     screenshots: any[];
     video?: IVideo;

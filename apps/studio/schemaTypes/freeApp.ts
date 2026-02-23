@@ -82,6 +82,13 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'requiresAccount',
+      title: 'Requires Account',
+      type: 'boolean',
+      initialValue: false,
+      description: 'If enabled, users must create an account/sign in to access the app',
+    }),
+    defineField({
       name: 'systemRequirements',
       title: 'System Requirements',
       type: 'systemRequirements',

@@ -14,3 +14,5 @@ export * from "./components/ui/label";
 export * from "./components/ui/comparison";
 export * from "./components/ui/slider";
 export * from "./components/ui/checkbox";
+export * from "./components/ui/dialog";
+export * from "./components/ui/tabs";

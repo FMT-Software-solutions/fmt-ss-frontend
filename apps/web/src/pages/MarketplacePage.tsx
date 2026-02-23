@@ -5,6 +5,7 @@ import { Link } from "react-router-dom"
 import { useAllApps } from "@/hooks/queries/useAllApps"
 import { useSectors } from "@/hooks/queries/useSectors"
 import { FilterSidebar } from "@/components/marketplace/FilterSidebar"
+import { SortSelect } from "@/components/marketplace/SortSelect"
 
 export default function MarketplacePage() {
   const { data: apps = [], isLoading: isLoadingApps } = useAllApps()
@@ -15,10 +16,11 @@ export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [sortBy, setSortBy] = useState("date-desc")
 
   // Memoized Filter Logic
   const filteredApps = useMemo(() => {
-    return apps.filter(app => {
+    const filtered = apps.filter(app => {
       // 1. Search Filter
       const matchesSearch = app.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         app.shortDescription?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -40,7 +42,33 @@ export default function MarketplacePage() {
 
       return matchesSearch && matchesSector && matchesPrice
     })
-  }, [apps, searchQuery, selectedSector, priceRange])
+
+    // Sorting Logic
+    return filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "date-desc":
+          return new Date(b.publishedAt || 0).getTime() - new Date(a.publishedAt || 0).getTime()
+        case "date-asc":
+          return new Date(a.publishedAt || 0).getTime() - new Date(b.publishedAt || 0).getTime()
+        case "price-desc": {
+          const priceA = a.isFree ? 0 : ((a.promotion?.hasPromotion && a.promotion?.isActive) ? (a.promotion.discountPrice ?? a.price) : a.price)
+          const priceB = b.isFree ? 0 : ((b.promotion?.hasPromotion && b.promotion?.isActive) ? (b.promotion.discountPrice ?? b.price) : b.price)
+          return priceB - priceA
+        }
+        case "price-asc": {
+          const priceA = a.isFree ? 0 : ((a.promotion?.hasPromotion && a.promotion?.isActive) ? (a.promotion.discountPrice ?? a.price) : a.price)
+          const priceB = b.isFree ? 0 : ((b.promotion?.hasPromotion && b.promotion?.isActive) ? (b.promotion.discountPrice ?? b.price) : b.price)
+          return priceA - priceB
+        }
+        case "name-asc":
+          return a.title.localeCompare(b.title)
+        case "name-desc":
+          return b.title.localeCompare(a.title)
+        default:
+          return 0
+      }
+    })
+  }, [apps, searchQuery, selectedSector, priceRange, sortBy])
 
   // Reset all filters
   const clearFilters = () => {
@@ -79,6 +107,10 @@ export default function MarketplacePage() {
             />
           </div>
 
+          <div className="w-full md:w-48 hidden md:block">
+            <SortSelect value={sortBy} onValueChange={setSortBy} />
+          </div>
+
           {/* Mobile Filter Sheet */}
           <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
             <SheetTrigger asChild>
@@ -104,6 +136,8 @@ export default function MarketplacePage() {
                 onPriceChange={setPriceRange}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
+                sortBy={sortBy}
+                onSortChange={setSortBy}
               />
               <div className="mt-8 pt-4 border-t sticky bottom-0 bg-background pb-4">
                 <Button className="w-full" onClick={() => setIsFilterOpen(false)}>
@@ -173,7 +207,7 @@ export default function MarketplacePage() {
 
                         {hasActivePromotion && (
                           <div className="absolute top-2 left-2">
-                            <Badge variant="destructive" className="animate-pulse">
+                            <Badge className="backdrop-blur-sm shadow-sm ">
                               Sale
                             </Badge>
                           </div>
@@ -202,16 +236,14 @@ export default function MarketplacePage() {
                                   GHS{displayPrice}
                                 </span>
                                 {hasActivePromotion && (
-                                  <span className="text-sm text-muted-foreground line-through">
+                                  <span className="text-xs text-muted-foreground line-through">
                                     GHS{app.price}
                                   </span>
                                 )}
                               </div>
                             )}
                           </div>
-                          <Button size="sm" variant="secondary" className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                            View Details
-                          </Button>
+
                         </div>
                       </CardContent>
                     </Card>

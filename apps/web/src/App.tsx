@@ -11,11 +11,13 @@ import UnsubscribePage from "./pages/UnsubscribePage"
 import ContactPage from "./pages/ContactPage"
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage"
 import TermsOfUsePage from "./pages/TermsOfUsePage"
+import { ErrorBoundary } from "./components/ui/error-boundary"
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
+    errorElement: <ErrorBoundary />,
     children: [
       {
         index: true,
@@ -26,7 +28,7 @@ const router = createBrowserRouter([
         element: <MarketplacePage />,
       },
       {
-        path: "item/:id",
+        path: "marketplace/:slug",
         element: <ItemDetailsPage />,
       },
       {
