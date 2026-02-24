@@ -11,6 +11,7 @@ import UnsubscribePage from "./pages/UnsubscribePage"
 import ContactPage from "./pages/ContactPage"
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage"
 import TermsOfUsePage from "./pages/TermsOfUsePage"
+import SuccessPage from "./pages/SuccessPage"
 import { ErrorBoundary } from "./components/ui/error-boundary"
 
 const router = createBrowserRouter([
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <LandingPage />,
+      },
+      {
+        path: "success",
+        element: <SuccessPage />,
       },
       {
         path: "marketplace",
