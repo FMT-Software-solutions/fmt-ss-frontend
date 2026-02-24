@@ -172,7 +172,7 @@ export function PaystackButton({
     if (items.length > 0) {
       const productId = items[0].productId;
       try {
-        const checkResponse = await fetch(`${API_BASE_URL}/purchases/check-access?email=${email}&productId=${productId}`);
+        const checkResponse = await fetch(`${API_BASE_URL}/purchases/check-access?email=${email}&productId=${productId}&mode=buy`);
         const checkResult = await checkResponse.json();
 
         if (checkResult.hasAccess) {
