@@ -7,7 +7,7 @@ import { ReviewForm } from "@/components/reviews/ReviewForm"
 import { useAppBySlug } from "@/hooks/queries/useAppBySlug"
 import { useAppReviews } from "@/hooks/queries/useReviews"
 import { Badge, Button, Card, CardContent, Dialog, DialogContent, DialogTrigger, Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui"
-import { Check, Info, Laptop, Loader2, MessageSquare, ShieldCheck, ShoppingCart, Star } from "lucide-react"
+import { Check, Info, Laptop, Loader2, MessageSquare, ShieldCheck, ShoppingCart, Star, Maximize2 } from "lucide-react"
 import { useState } from "react"
 import { Link, useParams } from "react-router-dom"
 
@@ -96,11 +96,29 @@ export default function ItemDetailsPage() {
               <Card className="overflow-hidden border-2 border-primary/10 shadow-lg">
                 <div className="aspect-video bg-muted relative">
                   {app.mainImage ? (
-                    <img
-                      src={app.mainImage}
-                      alt={app.title}
-                      className="w-full h-full object-cover"
-                    />
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <div className="relative w-full h-full group cursor-pointer">
+                          <img
+                            src={app.mainImage}
+                            alt={app.title}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-colors">
+                            <Maximize2 className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md" />
+                          </div>
+                        </div>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-[90vw] h-[90vh] p-0 border-none bg-black/95 flex items-center justify-center">
+                        <div className="w-full h-full flex items-center justify-center">
+                          <img
+                            src={app.mainImage}
+                            alt={app.title}
+                            className="max-h-full max-w-full object-contain"
+                          />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                       No Image

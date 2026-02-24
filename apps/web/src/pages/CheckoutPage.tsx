@@ -5,7 +5,7 @@ import { Lock } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { client, groq } from "@/lib/sanity";
 import { checkoutSchema, type CheckoutFormData } from "@/lib/checkout-schema";
@@ -63,21 +63,14 @@ export default function CheckoutPage() {
     mode: "onChange",
   });
 
-  useEffect(() => {
-    if (app) {
-      console.log("App Data Loaded:", app);
-      console.log("App Provisioning Config:", app.appProvisioning);
-    }
-  }, [app]);
-
   const handlePaymentSuccess = async (paymentDetails: any) => {
-    // If it's Hubtel, the purchase is already recorded by the HubtelCheckoutButton/Backend flow
-    if (paymentDetails.method === 'hubtel') {
+    // If it's Hubtel or Paystack, the purchase is already recorded by the Button/Backend flow
+    if (paymentDetails.method === 'hubtel' || paymentDetails.method === 'paystack') {
       navigate(`/success?reference=${paymentDetails.reference}&type=payment`);
       return;
     }
 
-    // For Paystack or others, we need to record it manually
+    // For others, we need to record it manually
     setIsProcessing(true);
     try {
       const formData = form.getValues();
@@ -179,6 +172,8 @@ export default function CheckoutPage() {
       {
         productId: app._id,
         quantity: 1,
+        title: app.title,
+        price: app.price,
         product: {
           title: app.title,
           price: app.price,

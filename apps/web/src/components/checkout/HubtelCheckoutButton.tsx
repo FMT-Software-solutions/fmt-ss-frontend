@@ -134,7 +134,6 @@ export function HubtelCheckoutButton({
         },
         callBacks: {
           onPaymentSuccess: async (data: any) => {
-            console.log("Payment success:", data);
             try {
               const checkoutResponse = await fetch(
                 `${API_BASE_URL}/payments/hubtel/checkout`,

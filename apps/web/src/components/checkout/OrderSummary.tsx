@@ -182,6 +182,7 @@ export function OrderSummary({
           isProcessing={isProcessing}
           isValid={isValid}
           items={items}
+          checkoutPayload={hubtelCheckoutPayload}
         />
       )}
     </Card>
