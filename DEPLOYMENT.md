@@ -11,9 +11,10 @@ This guide explains how to deploy the three frontend applications (Web, Admin, S
 ## Configuration Files
 
 I have already added `netlify.toml` configuration files to each application directory (`apps/web`, `apps/admin`, `apps/studio`). These files handle:
--   Build commands (`pnpm build`)
--   Publish directories (`dist`)
--   SPA routing rules (redirects for React Router)
+
+- Build commands (`pnpm build`)
+- Publish directories (`apps/[app-name]/dist`)
+- SPA routing rules (redirects for React Router)
 
 ## Deployment Steps
 
@@ -24,9 +25,10 @@ You will need to create **three separate sites** in Netlify, one for each applic
 1.  Go to your Netlify Dashboard and click **"Add new site"** -> **"Import an existing project"**.
 2.  Select your Git provider and choose this repository.
 3.  Configure the build settings:
-    *   **Base directory:** `fmt-ss-frontend/apps/web`
-    *   **Build command:** `pnpm build`
-    *   **Publish directory:** `dist`
+    - **Base directory:** `/` (leave empty)
+    - **Package directory:** `apps/web`
+    - **Build command:** `pnpm build`
+    - **Publish directory:** `apps/web/dist`
 4.  Click **Deploy site**.
 5.  Once deployed, go to **Domain management** -> **Domains**.
 6.  Click **"Add custom domain"** and enter `fmtsoftware.com`.
@@ -37,9 +39,10 @@ You will need to create **three separate sites** in Netlify, one for each applic
 1.  Go to your Netlify Dashboard and click **"Add new site"** -> **"Import an existing project"**.
 2.  Select the **same repository**.
 3.  Configure the build settings:
-    *   **Base directory:** `fmt-ss-frontend/apps/admin`
-    *   **Build command:** `pnpm build`
-    *   **Publish directory:** `dist`
+    - **Base directory:** `/` (leave empty)
+    - **Package directory:** `apps/admin`
+    - **Build command:** `pnpm build`
+    - **Publish directory:** `dist`
 4.  Click **Deploy site**.
 5.  Once deployed, go to **Domain management** -> **Domains**.
 6.  Click **"Add custom domain"** and enter `admin.fmtsoftware.com`.
@@ -50,9 +53,10 @@ You will need to create **three separate sites** in Netlify, one for each applic
 1.  Go to your Netlify Dashboard and click **"Add new site"** -> **"Import an existing project"**.
 2.  Select the **same repository**.
 3.  Configure the build settings:
-    *   **Base directory:** `fmt-ss-frontend/apps/studio`
-    *   **Build command:** `pnpm build`
-    *   **Publish directory:** `dist`
+    - **Base directory:** `/` (leave empty)
+    - **Package directory:** `apps/studio`
+    - **Build command:** `pnpm build`
+    - **Publish directory:** `dist`
 4.  Click **Deploy site**.
 5.  Once deployed, go to **Domain management** -> **Domains**.
 6.  Click **"Add custom domain"** and enter `studio.fmtsoftware.com`.
@@ -65,16 +69,18 @@ Since we moved the Sanity configuration to a shared file, you **do not** need to
 However, if your apps use other environment variables (like API URLs, Supabase keys, etc.), you must add them to each site in Netlify under **Site configuration** -> **Environment variables**.
 
 **Required Variables for Web & Admin:**
--   `VITE_API_URL`: Your backend API URL (e.g., `https://api.fmtsoftware.com` or wherever your backend is hosted).
--   `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase URL.
--   `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase Anon Key.
--   Any other variables from your `.env.local` file.
+
+- `VITE_API_URL`: Your backend API URL (e.g., `https://api.fmtsoftware.com` or wherever your backend is hosted).
+- `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase URL.
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase Anon Key.
+- Any other variables from your `.env.local` file.
 
 ## CORS Configuration
 
 Ensure your backend (NestJS) allows CORS requests from these three domains:
--   `https://fmtsoftware.com`
--   `https://admin.fmtsoftware.com`
--   `https://studio.fmtsoftware.com`
+
+- `https://fmtsoftware.com`
+- `https://admin.fmtsoftware.com`
+- `https://studio.fmtsoftware.com`
 
 You may need to update your backend's CORS settings in `main.ts` or `app.module.ts`.
