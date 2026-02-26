@@ -181,7 +181,6 @@ export function HubtelCheckoutButton({
             onFailure?.(data);
           },
           onModalClose: () => {
-            console.log("Modal closed");
             onClose();
           },
         },

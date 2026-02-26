@@ -16,8 +16,6 @@ import { useFeaturedApps } from '@/hooks/queries/useFeaturedApps';
 export function FeaturedApps() {
   const { data: apps = [], isLoading, error } = useFeaturedApps();
 
-  console.log('apps', apps);
-
   return (
     <section className="py-20 bg-muted/30">
       <div className="container px-4 md:px-6">
