@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/Footer"
 import { Outlet } from "react-router-dom"
 import { WhatsAppWidget } from "@/components/landing/WhatsAppWidget"
 import { Toaster } from "sonner"
+import { CookieConsent } from "@/components/layout/CookieConsent"
 
 export default function Layout() {
   return (
@@ -12,6 +13,7 @@ export default function Layout() {
         <Outlet />
       </main>
       <WhatsAppWidget />
+      <CookieConsent />
       <Footer />
       <Toaster />
     </div>
