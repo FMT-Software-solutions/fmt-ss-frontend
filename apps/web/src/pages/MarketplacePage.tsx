@@ -6,6 +6,7 @@ import { useAllApps } from "@/hooks/queries/useAllApps"
 import { useSectors } from "@/hooks/queries/useSectors"
 import { FilterSidebar } from "@/components/marketplace/FilterSidebar"
 import { SortSelect } from "@/components/marketplace/SortSelect"
+import { SEO } from "@/components/seo"
 
 export default function MarketplacePage() {
   const { data: apps = [], isLoading: isLoadingApps } = useAllApps()
@@ -89,6 +90,11 @@ export default function MarketplacePage() {
 
   return (
     <div className="container py-12 min-h-screen">
+      <SEO
+        title="Marketplace"
+        description="Discover premium software tools, apps, and templates to accelerate your workflow and business growth."
+        keywords={['marketplace', 'software', 'apps', 'templates', 'tools', 'download']}
+      />
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>

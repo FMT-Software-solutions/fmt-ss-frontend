@@ -10,6 +10,8 @@ import { Badge, Button, Card, CardContent, Dialog, DialogContent, DialogTrigger,
 import { Check, Info, Laptop, Loader2, MessageSquare, ShieldCheck, ShoppingCart, Star, Maximize2 } from "lucide-react"
 import { useState } from "react"
 import { Link, useParams } from "react-router-dom"
+import { SEO } from "@/components/seo"
+import { urlFor } from "@/lib/sanity"
 
 export default function ItemDetailsPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -40,10 +42,35 @@ export default function ItemDetailsPage() {
   const displayPrice = hasActivePromotion ? app.promotion?.discountPrice : app.price
 
   // Use first sector for related apps
-  const sectorId = app.sectors && app.sectors.length > 0 ? (app.sectors[0] as any)._id : undefined
+  const sectors = app?.sectors || []
+  const firstSector = sectors[0] as any
+  const sectorId = firstSector?._id
+
+  const mainImage = app?.mainImage
+  const imageUrl = mainImage ? urlFor(mainImage)?.width(1200).height(630).url() : undefined
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title={app.title}
+        description={app.shortDescription}
+        image={imageUrl}
+        type="product"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          "name": app.title,
+          "description": app.shortDescription,
+          "image": imageUrl,
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "All",
+          "offers": {
+            "@type": "Offer",
+            "price": app.isFree ? "0" : (app.promotion?.hasPromotion && app.promotion?.isActive ? app.promotion.discountPrice : app.price),
+            "priceCurrency": "USD",
+          }
+        }}
+      />
       {/* Hero Section */}
       <div className="relative bg-muted/30 border-b">
         <div className="container py-12 md:py-16">

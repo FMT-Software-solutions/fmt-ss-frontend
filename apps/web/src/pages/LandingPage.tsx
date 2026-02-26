@@ -5,10 +5,16 @@ import { DesktopAppsSection } from "@/components/landing/DesktopAppsSection"
 import { MobileAppsSection } from "@/components/landing/MobileAppsSection"
 import { TestimonialsCarousel } from "@/components/landing/TestimonialsCarousel"
 import { NewsletterSection } from "@/components/landing/NewsletterSection"
+import { SEO } from "@/components/seo"
 
 export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
+      <SEO 
+        title="Home"
+        description="FMT Software Solutions provides custom software solutions, web applications, and enterprise tools to help businesses grow."
+        keywords={['software', 'web development', 'mobile apps', 'enterprise software', 'FMT Software']}
+      />
       {/* Hero Section */}
       <HeroSection />
 

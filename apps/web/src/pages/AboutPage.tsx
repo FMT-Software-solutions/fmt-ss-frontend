@@ -2,10 +2,15 @@ import { Button } from "@repo/ui"
 import { Link } from "react-router-dom"
 import { ArrowRight, MessageSquare } from "lucide-react"
 import { motion } from "framer-motion"
+import { SEO } from "@/components/seo"
 
 export default function AboutPage() {
   return (
     <div className="container py-12 max-w-4xl">
+      <SEO
+        title="About Us"
+        description="Learn more about FMT Software Solutions, our mission, and our team of expert developers and designers."
+      />
       {/* Hero Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

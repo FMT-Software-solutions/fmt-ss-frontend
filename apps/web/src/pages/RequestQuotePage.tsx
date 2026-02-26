@@ -3,6 +3,7 @@ import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Inpu
 import { Send } from "lucide-react"
 import { useCreateQuote } from "@/hooks/queries/useQuotes"
 import { toast } from "sonner"
+import { SEO } from "@/components/seo"
 
 export default function RequestQuotePage() {
   const [formData, setFormData] = useState({
@@ -83,6 +84,10 @@ export default function RequestQuotePage() {
 
   return (
     <div className="container py-12 max-w-4xl">
+      <SEO
+        title="Request a Quote"
+        description="Tell us about your project and we'll get back to you with a customized proposal."
+      />
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">Request a Quote</h1>
         <p className="text-sm text-muted-foreground">

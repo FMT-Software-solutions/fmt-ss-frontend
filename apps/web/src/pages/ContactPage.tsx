@@ -4,6 +4,7 @@ import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Textare
 import { Clock, MapPin, Users, Mail, Phone, MessageCircle, Send, User } from "lucide-react"
 import { motion } from "framer-motion"
 import { toast } from "sonner"
+import { SEO } from "@/components/seo"
 
 const contactInfo = [
   {
@@ -71,6 +72,10 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen py-10">
+      <SEO
+        title="Contact Us"
+        description="Get in touch with FMT Software Solutions for custom software solutions, and more."
+      />
       <div className="container max-w-5xl">
         {/* Hero Section */}
         <motion.div
@@ -81,7 +86,7 @@ export default function ContactPage() {
         >
           <div className="relative py-12 px-6 rounded-3xl overflow-hidden">
             <div className="absolute inset-0 bg-linear-to-r from-primary/5 via-transparent to-primary/5 -z-10" />
-            
+
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -138,7 +143,7 @@ export default function ContactPage() {
                   <p className="font-medium text-foreground mb-1">{info.content}</p>
                   <p className="text-sm text-muted-foreground">{info.description}</p>
                 </div>
-                <Button 
+                <Button
                   onClick={info.action}
                   className="w-full group-hover:scale-105 transition-transform duration-200"
                   variant="outline"
@@ -185,12 +190,12 @@ export default function ContactPage() {
                     <User className="w-4 h-4 text-primary" />
                     Name
                   </Label>
-                  <Input 
-                    id="name" 
-                    value={formData.name} 
-                    onChange={handleInputChange} 
-                    placeholder="Your name" 
-                    required 
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Your name"
+                    required
                   />
                 </motion.div>
 
@@ -204,13 +209,13 @@ export default function ContactPage() {
                     <Mail className="w-4 h-4 text-primary" />
                     Email
                   </Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    value={formData.email} 
-                    onChange={handleInputChange} 
-                    placeholder="your.email@example.com" 
-                    required 
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="your.email@example.com"
+                    required
                   />
                 </motion.div>
 
@@ -224,13 +229,13 @@ export default function ContactPage() {
                     <MessageCircle className="w-4 h-4 text-primary" />
                     Message
                   </Label>
-                  <Textarea 
-                    id="message" 
-                    value={formData.message} 
-                    onChange={handleInputChange} 
-                    placeholder="How can we help you?" 
-                    className="min-h-37.5" 
-                    required 
+                  <Textarea
+                    id="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    placeholder="How can we help you?"
+                    className="min-h-37.5"
+                    required
                   />
                 </motion.div>
 
