@@ -74,7 +74,7 @@ function PremiumAppCard({
   app: IPremiumAppListItem;
   index: number;
 }) {
-  const { title, slug, mainImage, shortDescription, sectors, promotion, price } = app;
+  const { title, slug, mainImage, shortDescription, sectors } = app;
 
   const { finalPrice, originalPrice, hasActivePromotion, discountPercentage, isFree } = getPriceDetails(app);
 
