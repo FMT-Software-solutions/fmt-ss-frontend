@@ -10,6 +10,8 @@ interface CartItem {
     _id: string;
     title: string;
     price: number;
+    originalPrice?: number;
+    hasActivePromotion?: boolean;
   };
 }
 
@@ -77,6 +79,11 @@ export function OrderSummary({
               </div>
               <div className="text-right">
                 <p className="font-medium">GHS {(item.product.price * item.quantity).toFixed(2)}</p>
+                {item.product.hasActivePromotion && item.product.originalPrice && (
+                  <p className="text-xs text-muted-foreground line-through">
+                    GHS {(item.product.originalPrice * item.quantity).toFixed(2)}
+                  </p>
+                )}
               </div>
             </div>
           );

@@ -7,6 +7,7 @@ import { useSectors } from "@/hooks/queries/useSectors"
 import { FilterSidebar } from "@/components/marketplace/FilterSidebar"
 import { SortSelect } from "@/components/marketplace/SortSelect"
 import { SEO } from "@/components/seo"
+import { getPriceDetails } from "@/lib/pricing"
 
 export default function MarketplacePage() {
   const { data: apps = [], isLoading: isLoadingApps } = useAllApps()
@@ -33,11 +34,7 @@ export default function MarketplacePage() {
 
       // 3. Price Filter
       // Handle free apps and promotion prices
-      const effectivePrice = app.isFree ? 0 : (
-        (app.promotion?.hasPromotion && app.promotion?.isActive)
-          ? (app.promotion.discountPrice ?? app.price)
-          : app.price
-      )
+      const { finalPrice: effectivePrice } = getPriceDetails(app)
 
       const matchesPrice = effectivePrice >= priceRange[0] && effectivePrice <= priceRange[1]
 
@@ -52,13 +49,13 @@ export default function MarketplacePage() {
         case "date-asc":
           return new Date(a.publishedAt || 0).getTime() - new Date(b.publishedAt || 0).getTime()
         case "price-desc": {
-          const priceA = a.isFree ? 0 : ((a.promotion?.hasPromotion && a.promotion?.isActive) ? (a.promotion.discountPrice ?? a.price) : a.price)
-          const priceB = b.isFree ? 0 : ((b.promotion?.hasPromotion && b.promotion?.isActive) ? (b.promotion.discountPrice ?? b.price) : b.price)
+          const { finalPrice: priceA } = getPriceDetails(a)
+          const { finalPrice: priceB } = getPriceDetails(b)
           return priceB - priceA
         }
         case "price-asc": {
-          const priceA = a.isFree ? 0 : ((a.promotion?.hasPromotion && a.promotion?.isActive) ? (a.promotion.discountPrice ?? a.price) : a.price)
-          const priceB = b.isFree ? 0 : ((b.promotion?.hasPromotion && b.promotion?.isActive) ? (b.promotion.discountPrice ?? b.price) : b.price)
+          const { finalPrice: priceA } = getPriceDetails(a)
+          const { finalPrice: priceB } = getPriceDetails(b)
           return priceA - priceB
         }
         case "name-asc":
@@ -182,8 +179,7 @@ export default function MarketplacePage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredApps.map((app) => {
-                const hasActivePromotion = app.promotion?.hasPromotion && app.promotion?.isActive;
-                const displayPrice = hasActivePromotion ? app.promotion?.discountPrice : app.price;
+                const { finalPrice, originalPrice, hasActivePromotion, discountPercentage, isFree } = getPriceDetails(app);
 
                 return (
                   <Link key={app._id} to={`/marketplace/${app.slug}`} className="group h-full">
@@ -213,8 +209,8 @@ export default function MarketplacePage() {
 
                         {hasActivePromotion && (
                           <div className="absolute top-2 left-2">
-                            <Badge className="backdrop-blur-sm shadow-sm ">
-                              Sale
+                            <Badge className="backdrop-blur-sm shadow-sm bg-green-600 hover:bg-green-700 text-white border-none">
+                              -{discountPercentage}% Off
                             </Badge>
                           </div>
                         )}
@@ -234,16 +230,16 @@ export default function MarketplacePage() {
                       <CardContent className="p-4 pt-0 mt-auto">
                         <div className="flex items-center justify-between pt-4 border-t mt-2">
                           <div className="flex flex-col">
-                            {app.isFree ? (
+                            {isFree ? (
                               <span className="font-bold text-lg text-green-600">Free</span>
                             ) : (
                               <div className="flex items-baseline gap-2">
                                 <span className="font-bold text-lg">
-                                  GHS{displayPrice}
+                                  GHS {finalPrice}
                                 </span>
                                 {hasActivePromotion && (
                                   <span className="text-xs text-muted-foreground line-through">
-                                    GHS{app.price}
+                                    GHS {originalPrice}
                                   </span>
                                 )}
                               </div>

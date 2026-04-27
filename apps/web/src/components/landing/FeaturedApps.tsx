@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 import { urlFor } from '@/lib/sanity';
 import type { IPremiumAppListItem } from '@/types/premium-app';
 import { useFeaturedApps } from '@/hooks/queries/useFeaturedApps';
+import { getPriceDetails } from '@/lib/pricing';
 
 export function FeaturedApps() {
   const { data: apps = [], isLoading, error } = useFeaturedApps();
@@ -75,11 +76,7 @@ function PremiumAppCard({
 }) {
   const { title, slug, mainImage, shortDescription, sectors, promotion, price } = app;
 
-  const finalPrice = promotion?.hasPromotion && promotion?.isActive && promotion?.discountPrice
-    ? promotion.discountPrice
-    : price;
-
-
+  const { finalPrice, originalPrice, hasActivePromotion, discountPercentage, isFree } = getPriceDetails(app);
 
   const imageUrl = urlFor(mainImage)?.url() || '';
 
@@ -94,8 +91,10 @@ function PremiumAppCard({
         <CardHeader className="pb-4">
           <div className="flex justify-between items-start gap-2">
             <CardTitle className="line-clamp-1 text-xl">{title}</CardTitle>
-            {promotion?.hasPromotion && promotion?.isActive && (
-              <Badge className="bg-green-600 hover:bg-green-700 shrink-0">Promo</Badge>
+            {hasActivePromotion && (
+              <Badge className="bg-green-600 hover:bg-green-700 shrink-0">
+                -{discountPercentage}% Off
+              </Badge>
             )}
           </div>
           <CardDescription className="line-clamp-2 h-10">{shortDescription}</CardDescription>
@@ -120,7 +119,16 @@ function PremiumAppCard({
               </div>
             )}
             <div className="flex items-center gap-3 ml-auto">
-              <span className="font-semibold whitespace-nowrap">GHS {finalPrice}</span>
+              <div className="flex flex-col items-end">
+                {hasActivePromotion && (
+                  <span className="text-xs text-muted-foreground line-through">
+                    GHS {originalPrice}
+                  </span>
+                )}
+                <span className="font-semibold whitespace-nowrap">
+                  {isFree ? "Free" : `GHS ${finalPrice}`}
+                </span>
+              </div>
               <Button variant="secondary" size="sm" asChild>
                 <Link to={`/marketplace/${slug.current}`}>View</Link>
               </Button>

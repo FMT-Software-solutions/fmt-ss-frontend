@@ -14,6 +14,7 @@ import { BillingAddressForm } from "@/components/checkout/BillingAddressForm";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { toast } from "sonner";
 import { API_BASE_URL } from "@/lib/endpoints";
+import { getPriceDetails } from "@/lib/pricing";
 
 const appByIdQuery = groq`
   *[_type == "premiumApp" && _id == $id][0] {
@@ -21,6 +22,13 @@ const appByIdQuery = groq`
     title,
     price,
     isFree,
+    promotion {
+      hasPromotion,
+      discountPrice,
+      startDate,
+      endDate,
+      isActive
+    },
     "mainImage": mainImage.asset->url,
     "slug": slug.current,
     appProvisioning
@@ -74,6 +82,7 @@ export default function CheckoutPage() {
     setIsProcessing(true);
     try {
       const formData = form.getValues();
+      const { finalPrice } = getPriceDetails(app || {});
       const purchasePayload = {
         organizationDetails: {
           ...formData.organizationDetails,
@@ -83,11 +92,11 @@ export default function CheckoutPage() {
           {
             productId: app?._id,
             quantity: 1,
-            price: app?.price,
+            price: finalPrice,
             title: app?.title
           }
         ],
-        total: app?.price || 0,
+        total: finalPrice,
         payment_reference: paymentDetails.reference,
         status: 'completed',
         paymentProvider: paymentDetails.method,
@@ -159,7 +168,7 @@ export default function CheckoutPage() {
   }
 
   // Calculate totals
-  const total = app.price || 0;
+  const { finalPrice: total, originalPrice } = getPriceDetails(app);
   const subtotal = total; // Add tax logic if needed
 
   // Prepare Hubtel payload
@@ -173,10 +182,10 @@ export default function CheckoutPage() {
         productId: app._id,
         quantity: 1,
         title: app.title,
-        price: app.price,
+        price: total,
         product: {
           title: app.title,
-          price: app.price,
+          price: total,
           slug: app.slug
         }
       },
@@ -238,7 +247,9 @@ export default function CheckoutPage() {
                 product: {
                   _id: app._id,
                   title: app.title,
-                  price: app.price || 0
+                  price: total,
+                  originalPrice: originalPrice,
+                  hasActivePromotion: getPriceDetails(app).hasActivePromotion,
                 }
               },
             ]}

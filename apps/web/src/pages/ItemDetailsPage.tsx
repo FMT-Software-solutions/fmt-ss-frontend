@@ -12,6 +12,7 @@ import { useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import { SEO } from "@/components/seo"
 import { urlFor } from "@/lib/sanity"
+import { getPriceDetails } from "@/lib/pricing"
 
 export default function ItemDetailsPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -38,8 +39,7 @@ export default function ItemDetailsPage() {
     )
   }
 
-  const hasActivePromotion = app.promotion?.hasPromotion && app.promotion?.isActive
-  const displayPrice = hasActivePromotion ? app.promotion?.discountPrice : app.price
+  const { finalPrice, originalPrice, hasActivePromotion, discountPercentage, isFree } = getPriceDetails(app)
 
   // Use first sector for related apps
   const sectors = app?.sectors || []
@@ -66,7 +66,7 @@ export default function ItemDetailsPage() {
           "operatingSystem": "All",
           "offers": {
             "@type": "Offer",
-            "price": app.isFree ? "0" : (app.promotion?.hasPromotion && app.promotion?.isActive ? app.promotion.discountPrice : app.price),
+            "price": finalPrice,
             "priceCurrency": "USD",
           }
         }}
@@ -82,8 +82,8 @@ export default function ItemDetailsPage() {
                     {sector.name}
                   </Badge>
                 ))}
-                {hasActivePromotion && (
-                  <Badge variant="destructive" className="animate-pulse">Sale</Badge>
+                {hasActivePromotion && !isFree && (
+                  <Badge variant="destructive" className="animate-pulse">-{discountPercentage}% Off</Badge>
                 )}
               </div>
 
@@ -93,7 +93,7 @@ export default function ItemDetailsPage() {
               </p>
 
               <div className="flex flex-wrap gap-4 pt-4">
-                {!app.isFree &&
+                {!isFree &&
                   <>
                     <Button size="lg" className="gap-2 px-6" asChild>
                       <Link to={`/checkout/${app._id}`}>
@@ -105,7 +105,7 @@ export default function ItemDetailsPage() {
               </div>
 
               <div className="flex items-center gap-6 text-sm text-muted-foreground pt-2">
-                {app.isFree ? null : (
+                {isFree ? null : (
                   <div className="flex items-center gap-1">
                     <ShieldCheck className="h-4 w-4" />
                     <span>Secure Payment</span>
@@ -155,16 +155,16 @@ export default function ItemDetailsPage() {
                 <CardContent className="px-4 py-4 space-y-4">
                   <div className="flex items-baseline justify-end">
                     <div className="text-right">
-                      {app.isFree ? (
+                      {isFree ? (
                         <span className="text-2xl font-bold text-green-600">Free</span>
                       ) : (
                         <div className="flex flex-col items-end">
                           <span className="text-2xl font-bold text-primary">
-                            GHS{displayPrice}
+                            GHS {finalPrice}
                           </span>
                           {hasActivePromotion && (
                             <span className="text-sm text-muted-foreground line-through decoration-destructive/50">
-                              GHS{app.price}
+                              GHS {originalPrice}
                             </span>
                           )}
                         </div>
