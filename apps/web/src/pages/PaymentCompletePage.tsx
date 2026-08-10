@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@repo/ui';
-import { AlertCircle, CheckCircle2, Loader2, Monitor } from 'lucide-react';
+import { CheckCircle2, Loader2, Monitor } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { API_BASE_URL } from '../lib/endpoints';
 
@@ -108,20 +108,18 @@ export default function PaymentCompletePage() {
         <Card className="text-center shadow-lg">
           <CardHeader>
             <div className="mb-4 flex justify-center">
+              {/* Reaching this page means Paystack completed the charge, so the
+                  payment is a success either way. Only the crediting may still
+                  be in flight — that is a neutral "in progress", not a warning,
+                  and dressing it as one contradicts the heading. */}
               {status === 'checking' ? (
                 <Loader2 className="h-16 w-16 animate-spin text-muted-foreground" />
-              ) : status === 'pending' ? (
-                <AlertCircle className="h-16 w-16 text-amber-500" />
               ) : (
                 <CheckCircle2 className="h-16 w-16 text-green-500" />
               )}
             </div>
             <CardTitle className="text-2xl">
-              {status === 'checking'
-                ? 'Confirming your payment…'
-                : status === 'pending'
-                  ? 'Payment received'
-                  : 'Payment complete'}
+              {status === 'checking' ? 'Confirming your payment…' : 'Payment received'}
             </CardTitle>
             <CardDescription>
               {status === 'checking'
@@ -130,7 +128,7 @@ export default function PaymentCompletePage() {
                   ? credits
                     ? `${Number(credits).toLocaleString()} SMS credits have been added.`
                     : `Your ${productLabel} have been added.`
-                  : `Your ${productLabel} will be added automatically.`}
+                  : `Your ${productLabel} are being added now.`}
             </CardDescription>
           </CardHeader>
 
@@ -147,9 +145,8 @@ export default function PaymentCompletePage() {
 
             {status === 'pending' && (
               <p className="text-sm text-muted-foreground">
-                We haven't finished confirming this with our payment provider yet.
-                If you were charged, the credit still arrives automatically. Contact
-                support with the reference below if it hasn't appeared shortly.
+                This can take a few moments to appear. If it hasn't shown up shortly,
+                contact support with the reference below.
               </p>
             )}
 
