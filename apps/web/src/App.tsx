@@ -12,6 +12,7 @@ import ContactPage from "./pages/ContactPage"
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage"
 import TermsOfUsePage from "./pages/TermsOfUsePage"
 import SuccessPage from "./pages/SuccessPage"
+import PaymentCompletePage from "./pages/PaymentCompletePage"
 import { ErrorBoundary } from "./components/ui/error-boundary"
 
 const router = createBrowserRouter([
@@ -27,6 +28,13 @@ const router = createBrowserRouter([
       {
         path: "success",
         element: <SuccessPage />,
+      },
+      {
+        // Shared Paystack landing page for in-app purchases from any FMT
+        // product. Desktop apps run from file:// URLs Paystack cannot redirect
+        // to, so they send customers here instead.
+        path: "payment-complete",
+        element: <PaymentCompletePage />,
       },
       {
         path: "marketplace",
