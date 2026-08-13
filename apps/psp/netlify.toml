@@ -1,0 +1,21 @@
+[build]
+  command = "pnpm build"
+  publish = "apps/psp/dist"
+
+# Single-page app: every path is served by index.html and routed client-side.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Attendance links carry a one-day token and land on a page that asks for a
+# PIN and reads the device location. None of that should be cached, indexed or
+# handed to a referrer.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Referrer-Policy = "no-referrer"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Permissions-Policy = "geolocation=(self), camera=(), microphone=()"
