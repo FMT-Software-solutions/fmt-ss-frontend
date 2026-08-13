@@ -19,3 +19,8 @@
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "DENY"
     Permissions-Policy = "geolocation=(self), camera=(), microphone=()"
+    # People type PINs here, so never allow a downgrade to HTTP. Per RFC 6797
+    # includeSubDomains scopes to the SENDING host's subtree — that is
+    # *.printsuitepro.fmtsoftware.com only. It does NOT reach fmtsoftware.com
+    # or its other subdomains, which set their own policy.
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
