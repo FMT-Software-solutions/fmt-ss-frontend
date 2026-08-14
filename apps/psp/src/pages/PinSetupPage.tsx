@@ -69,7 +69,7 @@ export function PinSetupPage() {
           <h1 className="mt-3 text-xl font-semibold text-slate-900">Your PIN is set</h1>
           <p className="mt-2 text-sm text-slate-600">
             Use it each day with the attendance link you receive. Keep it to yourself — anyone
-            who knows it can mark attendance as you.
+            who knows it can view your personal details.
           </p>
         </Card>
       </Shell>

@@ -17,7 +17,7 @@
  * place them at work.
  */
 const NOT_CLOSE_ENOUGH = {
-  title: 'You are not at work yet',
+  title: 'You are not within the allowed proximity',
   body: 'You need to be at the workplace to mark attendance. Move closer and try again.',
 }
 
