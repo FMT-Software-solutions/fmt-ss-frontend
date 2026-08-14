@@ -7,11 +7,26 @@
  *
  * The code in the URL is a public organization slug, not a secret: it only
  * reaches this form. Everything that matters is still the PIN and the geofence.
+ *
+ * ONE ACTION AT A TIME, same as the SMS route. This page used to ask "clock in
+ * or clock out?" on the first screen, before it knew who was standing there —
+ * which offered a choice that isn't one (the server refuses a clock-out on a
+ * day with no clock-in) and then showed the verb a second time on the next
+ * screen. It now asks for the phone number alone, and the moment the PIN lands
+ * `get_attendance_state_by_phone` says which single action to offer. The PIN is
+ * what makes that safe to ask: a phone number on its own must never reveal who
+ * is on the roster or who is at work today.
  */
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { CheckCircle2 } from 'lucide-react'
-import { getOrgByCode, type MarkResult, type OrgLookup } from '@/lib/api'
+import {
+  getOrgByCode,
+  getStateByPhone,
+  type LinkState,
+  type MarkResult,
+  type OrgLookup,
+} from '@/lib/api'
 import { BigButton, Card, Notice, Shell, Spinner } from '@/components/Shell'
 import { MarkForm } from '@/components/MarkForm'
 import { markFailureMessage } from '@/lib/markMessages'
@@ -27,8 +42,12 @@ export function QrPage() {
 
   const [phone, setPhone] = useState('')
   const [confirmed, setConfirmed] = useState(false)
-  const [action, setAction] = useState<'clock_in' | 'clock_out'>('clock_in')
   const [result, setResult] = useState<MarkResult | null>(null)
+
+  // What the server says to offer, once the PIN has identified them.
+  const [link, setLink] = useState<LinkState | null>(null)
+  const [resolving, setResolving] = useState(false)
+  const [pinError, setPinError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -45,6 +64,43 @@ export function QrPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  /**
+   * Runs on the fourth digit. A refusal is reported in the PIN field rather
+   * than as a whole new screen: they are one keystroke from fixing it, and
+   * throwing them back to the phone number would mean retyping that too.
+   */
+  const resolveAction = async (pin: string) => {
+    if (!org || org.state !== 'ok') return
+    setResolving(true)
+    setPinError(null)
+    setLink(null)
+    try {
+      const state = await getStateByPhone({ orgId: org.organization_id!, phone, pin })
+      if (state.state === 'ok') {
+        setLink(state)
+      } else if (state.state === 'invalid_credentials') {
+        // Deliberately vague, matching the server: naming which half was wrong
+        // would turn this box into a roster lookup.
+        setPinError('That number and PIN don’t match. Check both and try again.')
+      } else {
+        const { body } = markFailureMessage(state.state)
+        setPinError(body)
+      }
+    } catch (err) {
+      setPinError(err instanceof Error ? err.message : 'Something went wrong. Try again.')
+    } finally {
+      setResolving(false)
+    }
+  }
+
+  /** Back to the phone screen, with nothing carried over. */
+  const startOver = () => {
+    setConfirmed(false)
+    setLink(null)
+    setPinError(null)
+    setResult(null)
+  }
 
   if (loading) {
     return (
@@ -107,6 +163,11 @@ export function QrPage() {
             {result.location_name && (
               <p className="mt-1 text-sm text-slate-500">{result.location_name}</p>
             )}
+            <p className="mt-3 text-sm text-slate-500">
+              {result.action === 'clock_in'
+                ? 'Scan the poster again when you finish, to clock out.'
+                : 'Have a good evening.'}
+            </p>
           </Card>
           <RecordUnlock phone={phone} orgId={org.organization_id} />
         </div>
@@ -135,6 +196,9 @@ export function QrPage() {
   }
 
   // ---- who are you? -------------------------------------------------------
+  // Phone number only. No clock in / clock out here: at this point the page has
+  // no idea who is holding it, so it cannot know which one to offer, and asking
+  // is how somebody ends up tapping the wrong one.
   if (!confirmed) {
     return (
       <Shell org={org.organization_name}>
@@ -167,26 +231,6 @@ export function QrPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              {(['clock_in', 'clock_out'] as const).map((a) => (
-                <button
-                  key={a}
-                  type="button"
-                  onClick={() => setAction(a)}
-                  className={`min-h-12 rounded-xl border text-sm font-semibold ${
-                    action === a
-                      ? 'border-slate-900 bg-slate-900 text-white'
-                      : 'border-slate-300 bg-white text-slate-700'
-                  }`}
-                >
-                  {a === 'clock_in' ? 'Clock in' : 'Clock out'}
-                </button>
-              ))}
-            </div>
-            {/* The poster route can't know their state before they identify
-                themselves, so unlike the SMS link it has to ask. The server
-                still refuses a nonsensical pair. */}
-
             <BigButton type="submit" disabled={phone.replace(/\D/g, '').length < 9}>
               Continue
             </BigButton>
@@ -196,20 +240,59 @@ export function QrPage() {
     )
   }
 
+  // ---- nothing left to do today -------------------------------------------
+  if (link?.next_action === 'done') {
+    return (
+      <Shell org={org.organization_name}>
+        <div className="space-y-4">
+          <Notice
+            tone="success"
+            title="You're all done today"
+            body={
+              <>
+                In at <strong>{formatTime(link.clock_in_at)}</strong>, out at{' '}
+                <strong>{formatTime(link.clock_out_at)}</strong>.
+              </>
+            }
+          />
+          <RecordUnlock phone={phone} orgId={org.organization_id} />
+        </div>
+      </Shell>
+    )
+  }
+
+  // ---- PIN, then the one action -------------------------------------------
+  const action = link?.next_action === 'clock_out' ? 'clock_out' : link ? 'clock_in' : null
+
   return (
     <Shell org={org.organization_name}>
       <MarkForm
         action={action}
-        proximityRequired
+        // Assume proximity is needed until told otherwise, so the GPS fix is
+        // already being acquired while they type rather than starting after.
+        proximityRequired={link ? link.proximity_required !== false : true}
         phone={phone}
         orgId={org.organization_id}
-        heading={action === 'clock_in' ? 'Clock in' : 'Clock out'}
-        subheading={phone}
+        heading={
+          action === 'clock_out'
+            ? `Finishing up${link?.employee_name ? `, ${link.employee_name}` : ''}?`
+            : action === 'clock_in'
+              ? `${greeting()}${link?.employee_name ? `, ${link.employee_name}` : ''}`
+              : 'Enter your PIN'
+        }
+        subheading={
+          action === 'clock_out' && link?.clock_in_at
+            ? `You clocked in at ${formatTime(link.clock_in_at)}`
+            : phone
+        }
+        onPinComplete={(pin) => void resolveAction(pin)}
+        resolving={resolving}
+        pinError={pinError}
         onResult={(r) => setResult(r)}
       />
       <button
         type="button"
-        onClick={() => setConfirmed(false)}
+        onClick={startOver}
         className="mt-4 w-full text-center text-sm text-slate-500 underline underline-offset-2"
       >
         Use a different number

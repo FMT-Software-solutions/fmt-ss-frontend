@@ -18,7 +18,12 @@ export function PinInput({
 }: {
   value: string
   onChange: (value: string) => void
-  onComplete?: () => void
+  /**
+   * Fired on the fourth digit, with that digit already included. It carries the
+   * value because it fires from the same change that produced it — a caller
+   * reading its own `value` prop here would still be one keystroke behind.
+   */
+  onComplete?: (value: string) => void
   disabled?: boolean
   label?: string
   autoFocus?: boolean
@@ -48,7 +53,7 @@ export function PinInput({
         onChange={(e) => {
           const next = e.target.value.replace(/\D/g, '').slice(0, 4)
           onChange(next)
-          if (next.length === 4) onComplete?.()
+          if (next.length === 4) onComplete?.(next)
         }}
         className="w-full h-16 rounded-xl border border-slate-300 bg-white text-center text-3xl font-semibold tracking-[0.5em] indent-[0.5em] text-slate-900 disabled:bg-slate-100"
         placeholder="••••"

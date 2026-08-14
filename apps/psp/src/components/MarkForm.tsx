@@ -7,6 +7,13 @@
  * Location is requested on mount rather than on submit. Getting a GPS fix takes
  * several seconds; doing it while somebody types their PIN means the tap is
  * instant instead of hanging on a spinner they can't explain.
+ *
+ * WHEN THE ACTION ISN'T KNOWN YET (`action = null`): the QR route can't tell
+ * clock-in from clock-out until the PIN identifies who is holding the phone, so
+ * it passes null and resolves on `onPinComplete`. The button reads "Continue"
+ * and stays disabled until the answer arrives, which takes about as long as the
+ * fourth digit. It is never labelled with a guess — offering the wrong verb is
+ * how you end up with somebody tapping "Clock out" at 7am.
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { MapPin, ShieldCheck } from 'lucide-react'
@@ -23,7 +30,8 @@ import { BigButton, Card } from './Shell'
 import { PinInput } from './PinInput'
 
 interface MarkFormProps {
-  action: MarkAction
+  /** Null while the QR route is still working out which action to offer. */
+  action: MarkAction | null
   proximityRequired: boolean
   token?: string | null
   phone?: string | null
@@ -31,6 +39,12 @@ interface MarkFormProps {
   /** Shown above the action, e.g. "Good morning, Kofi". */
   heading: string
   subheading?: string
+  /** Fired once the fourth digit lands, for routes that resolve `action` here. */
+  onPinComplete?: (pin: string) => void
+  /** True while that resolution is in flight. */
+  resolving?: boolean
+  /** Set by the caller when resolution came back refused, so the PIN clears. */
+  pinError?: string | null
   onResult: (result: MarkResult, pin: string) => void
 }
 
@@ -42,6 +56,9 @@ export function MarkForm({
   orgId,
   heading,
   subheading,
+  onPinComplete,
+  resolving = false,
+  pinError = null,
   onResult,
 }: MarkFormProps) {
   const [pin, setPin] = useState('')
@@ -80,6 +97,10 @@ export function MarkForm({
       return
     }
 
+    // The QR route hasn't been told what to do yet. Nothing to submit — the
+    // button is disabled in this state anyway; this is the belt to that braces.
+    if (!action) return
+
     setSubmitting(true)
     setError(null)
     try {
@@ -116,7 +137,11 @@ export function MarkForm({
     }
   }
 
-  const verb = action === 'clock_in' ? 'Clock in' : 'Clock out'
+  // Never a guess: until the server says which, the button is a neutral
+  // "Continue" that can't be tapped.
+  const verb = action === null ? 'Continue' : action === 'clock_in' ? 'Clock in' : 'Clock out'
+  const busy = submitting || resolving
+  const shownError = error ?? pinError
 
   return (
     <Card>
@@ -136,10 +161,11 @@ export function MarkForm({
             setPin(v)
             setError(null)
           }}
-          disabled={submitting}
+          onComplete={onPinComplete}
+          disabled={busy}
         />
 
-        {error && <p className="text-sm text-rose-600">{error}</p>}
+        {shownError && <p className="text-sm text-rose-600">{shownError}</p>}
 
         {proximityRequired && (
           <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm">
@@ -170,8 +196,8 @@ export function MarkForm({
           </div>
         )}
 
-        <BigButton type="submit" disabled={submitting || pin.length < 4}>
-          {submitting ? 'Checking…' : verb}
+        <BigButton type="submit" disabled={busy || pin.length < 4 || !action}>
+          {resolving ? 'Checking…' : submitting ? 'Marking…' : verb}
         </BigButton>
       </form>
     </Card>

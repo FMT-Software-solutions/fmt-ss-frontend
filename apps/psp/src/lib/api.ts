@@ -27,7 +27,18 @@ export type MarkState =
   | 'unexpected_error'
 
 export interface LinkState {
-  state: 'ok' | 'invalid_link'
+  /**
+   * The token route only ever fails one way (a bad or expired link). The QR
+   * route reaches the same payload with a phone number and a PIN, so it can
+   * also come back with the credential states.
+   */
+  state:
+    | 'ok'
+    | 'invalid_link'
+    | 'invalid_credentials'
+    | 'pin_not_set'
+    | 'pin_locked'
+    | 'self_mark_disabled'
   organization_name?: string
   employee_name?: string
   work_date?: string
@@ -101,6 +112,28 @@ function asUnexpected(label: string, error: unknown): never {
 export async function getLinkState(token: string): Promise<LinkState> {
   const { data, error } = await supabase.rpc('get_attendance_link_state', { p_token: token })
   if (error) asUnexpected('get_attendance_link_state', error)
+  return data as LinkState
+}
+
+/**
+ * The QR route's equivalent of getLinkState: which single action to offer.
+ *
+ * Costs a PIN, and that is the point — a phone number alone must not reveal
+ * who is on the roster or who is at work. Wrong number and wrong PIN come back
+ * identically, and both count towards the same lockout as marking does.
+ */
+export async function getStateByPhone(args: {
+  orgId: string
+  phone: string
+  pin: string
+}): Promise<LinkState> {
+  const { data, error } = await supabase.rpc('get_attendance_state_by_phone', {
+    p_org_id: args.orgId,
+    p_phone: args.phone,
+    p_pin: args.pin,
+    p_user_agent: navigator.userAgent,
+  })
+  if (error) asUnexpected('get_attendance_state_by_phone', error)
   return data as LinkState
 }
 
