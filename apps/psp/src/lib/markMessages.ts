@@ -3,6 +3,24 @@
  * what to DO, not what went wrong internally — "you're too far away" beats
  * "outside_radius", and neither reveals where the geofence actually is.
  */
+
+/**
+ * Being too far away and having a fix too vague to trust are two different
+ * facts about the phone, and exactly one message to the person holding it.
+ *
+ * The server separates them and should keep separating them — a manager
+ * reading the Attempts page needs to tell "clocking in from home" apart from
+ * "cheap handset indoors". But the employee can do nothing with that
+ * distinction. The previous wording told them to step outside so the phone
+ * could see the sky, which is both odd to read and useless advice to someone
+ * whose job is indoors; either way what they need to hear is that we could not
+ * place them at work.
+ */
+const NOT_CLOSE_ENOUGH = {
+  title: 'You are not at work yet',
+  body: 'You need to be at the workplace to mark attendance. Move closer and try again.',
+}
+
 export function markFailureMessage(state: string): { title: string; body: string } {
   switch (state) {
     case 'invalid_credentials':
@@ -21,15 +39,8 @@ export function markFailureMessage(state: string): { title: string; body: string
         body: 'Ask your manager to send you a link to set one up.',
       }
     case 'outside_radius':
-      return {
-        title: 'You are not at work yet',
-        body: 'You need to be at the workplace to mark attendance. Move closer and try again.',
-      }
     case 'location_accuracy_low':
-      return {
-        title: 'Your location is not precise enough',
-        body: 'Step outside or near a window so your phone can see the sky, then try again.',
-      }
+      return NOT_CLOSE_ENOUGH
     case 'location_required':
       return {
         title: 'Location is needed',
