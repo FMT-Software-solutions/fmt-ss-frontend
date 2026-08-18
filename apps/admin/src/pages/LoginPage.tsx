@@ -9,7 +9,6 @@ import {
   Button,
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
   Input,
@@ -73,12 +72,10 @@ export function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="space-y-3">
-          <Logo className="h-9" />
+          <Logo className="w-18 mx-auto mb-8" />
           <div className="space-y-1">
             <CardTitle>Admin sign in</CardTitle>
-            <CardDescription>
-              Manage apps, organizations and messaging.
-            </CardDescription>
+
           </div>
         </CardHeader>
         <CardContent>
