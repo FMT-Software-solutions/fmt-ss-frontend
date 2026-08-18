@@ -1,35 +1,65 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { LoginPage } from '@/pages/LoginPage';
+import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
+import { DashboardPage } from '@/pages/DashboardPage';
+import { MessagesPage } from '@/pages/site/MessagesPage';
+import { QuotesPage } from '@/pages/site/QuotesPage';
+import { PurchasesPage } from '@/pages/site/PurchasesPage';
+import { ReviewsPage } from '@/pages/site/ReviewsPage';
+import { NewsletterPage } from '@/pages/site/NewsletterPage';
+import { TrainingPage } from '@/pages/site/TrainingPage';
+import { IssuesPage } from '@/pages/site/IssuesPage';
+import { OrganizationsPage } from '@/pages/apps/OrganizationsPage';
+import { OrganizationDetailPage } from '@/pages/apps/OrganizationDetailPage';
+import { ProvisioningPage } from '@/pages/ProvisioningPage';
+import { DefaultsPage } from '@/pages/defaults/DefaultsPage';
+import { SmsDashboardPage } from '@/pages/SmsDashboardPage';
+import { AnalyticsPage } from '@/pages/AnalyticsPage';
+
+const router = createBrowserRouter([
+  {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
+  },
+  {
+    element: <ProtectedRoute />,
+    children: [
+      {
+        element: <AppLayout />,
+        children: [
+          { path: '/', element: <DashboardPage /> },
+
+          { path: '/site/messages', element: <MessagesPage /> },
+          { path: '/site/quotes', element: <QuotesPage /> },
+          { path: '/site/purchases', element: <PurchasesPage /> },
+          { path: '/site/reviews', element: <ReviewsPage /> },
+          { path: '/site/newsletter', element: <NewsletterPage /> },
+          { path: '/site/training', element: <TrainingPage /> },
+          { path: '/site/issues', element: <IssuesPage /> },
+
+          { path: '/organizations', element: <OrganizationsPage /> },
+          { path: '/organizations/:appId', element: <OrganizationsPage /> },
+          { path: '/organizations/:appId/:orgId', element: <OrganizationDetailPage /> },
+          { path: '/provisioning', element: <ProvisioningPage /> },
+          { path: '/defaults', element: <DefaultsPage /> },
+          { path: '/defaults/:appId', element: <DefaultsPage /> },
+
+          { path: '/sms', element: <SmsDashboardPage /> },
+          { path: '/analytics', element: <AnalyticsPage /> },
+        ],
+      },
+    ],
+  },
+]);
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  return <RouterProvider router={router} />;
 }
 
-export default App
+export default App;

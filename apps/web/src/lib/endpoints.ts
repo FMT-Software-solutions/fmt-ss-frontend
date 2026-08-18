@@ -14,4 +14,7 @@ export const API_ENDPOINTS = {
     testimonials: `${API_BASE_URL}/testimonials`,
     quotes: `${API_BASE_URL}/quotes`,
     contact: `${API_BASE_URL}/contact`,
+    analytics: {
+        collect: `${API_BASE_URL}/analytics/collect`,
+    },
 } as const;

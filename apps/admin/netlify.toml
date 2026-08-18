@@ -2,7 +2,23 @@
   command = "pnpm build"
   publish = "apps/admin/dist"
 
+# Single-page app: every path is served by index.html and routed client-side.
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+# Internal back-office console: never indexed, never framed, and no referrer
+# leakage of admin paths to third parties.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Referrer-Policy = "no-referrer"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Permissions-Policy = "geolocation=(), camera=(), microphone=()"
+    # Admin credentials are typed here, so never allow a downgrade to HTTP.
+    # includeSubDomains scopes to the sending host's subtree only
+    # (admin.fmtsoftware.com), not to fmtsoftware.com or its other subdomains.
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"

@@ -163,11 +163,6 @@ export function QrPage() {
             {result.location_name && (
               <p className="mt-1 text-sm text-slate-500">{result.location_name}</p>
             )}
-            <p className="mt-3 text-sm text-slate-500">
-              {result.action === 'clock_in'
-                ? 'Scan the poster again when you finish, to clock out.'
-                : 'Have a good evening.'}
-            </p>
           </Card>
           <RecordUnlock phone={phone} orgId={org.organization_id} />
         </div>
