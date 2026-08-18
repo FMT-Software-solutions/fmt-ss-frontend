@@ -4,6 +4,7 @@ export interface AppCapabilities {
   hasWelcomeCredits: boolean;
   hasSmsDeliveryTracking: boolean;
   hasAiDailyLimit: boolean;
+  hasServiceCatalog: boolean;
   staticRoles?: string[];
   membershipOverrideColumn?: string;
   membershipFlags?: string[];

@@ -34,7 +34,12 @@ import {
   type TemplateKind,
 } from '@/types/defaults';
 
-const ALL_KINDS: TemplateKind[] = ['branding', 'roles', 'organization_settings'];
+const ALL_KINDS: TemplateKind[] = [
+  'branding',
+  'roles',
+  'organization_settings',
+  'services',
+];
 
 export function DefaultsPage() {
   const { appId } = useParams<{ appId: string }>();
@@ -49,9 +54,12 @@ export function DefaultsPage() {
   }, [appId, registry, navigate]);
 
   const activeApp = registry?.find((app) => app.id === appId);
-  const kinds = ALL_KINDS.filter(
-    (kind) => kind !== 'roles' || activeApp?.capabilities.hasDynamicRoles,
-  );
+  // Only offer templates the app's schema can actually hold.
+  const kinds = ALL_KINDS.filter((kind) => {
+    if (kind === 'roles') return Boolean(activeApp?.capabilities.hasDynamicRoles);
+    if (kind === 'services') return Boolean(activeApp?.capabilities.hasServiceCatalog);
+    return true;
+  });
 
   return (
     <>

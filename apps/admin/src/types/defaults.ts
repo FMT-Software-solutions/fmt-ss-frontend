@@ -1,4 +1,4 @@
-export type TemplateKind = 'branding' | 'roles' | 'organization_settings';
+export type TemplateKind = 'branding' | 'roles' | 'organization_settings' | 'services';
 
 export interface DefaultTemplate {
   id: string;
@@ -44,10 +44,13 @@ export const TEMPLATE_LABELS: Record<TemplateKind, string> = {
   branding: 'Branding',
   roles: 'Roles',
   organization_settings: 'Organization settings',
+  services: 'Service catalogue',
 };
 
 export const TEMPLATE_DESCRIPTIONS: Record<TemplateKind, string> = {
   branding: 'Brand colours, theme, logo and notification settings applied to new organizations.',
   roles: 'Roles and their permissions, seeded for apps with a dynamic role system.',
   organization_settings: 'Baseline settings such as currency and AI daily limit.',
+  services:
+    'Service categories and their services. Applying adds anything missing and leaves prices an organization has already adjusted alone.',
 };
