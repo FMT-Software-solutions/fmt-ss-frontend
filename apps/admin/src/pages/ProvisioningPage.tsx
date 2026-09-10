@@ -68,6 +68,7 @@ export function ProvisioningPage() {
   const [createdOrgId, setCreatedOrgId] = useState<string | null>(null);
   const [createdPurchaseId, setCreatedPurchaseId] = useState<string | null>(null);
   const [provisioned, setProvisioned] = useState(false);
+  const [failures, setFailures] = useState<{ productId: string; error?: string }[]>([]);
 
   const { data: apps, isLoading: appsLoading } = useProvisionableApps();
   const preflightMutation = usePreflight();
@@ -115,6 +116,7 @@ export function ProvisioningPage() {
     setCreatedOrgId(null);
     setCreatedPurchaseId(null);
     setProvisioned(false);
+    setFailures([]);
     setSameOwnerEmail(true);
     setOwnerEmail('');
   };
@@ -130,19 +132,27 @@ export function ProvisioningPage() {
   };
 
   const onboard = async () => {
-    const purchase = await createPurchase.mutateAsync({
-      billingDetails: details,
-      items,
-      total,
-      isExistingOrg: Boolean(preflight?.organization),
-      note: note.trim() || undefined,
-    });
-    setCreatedOrgId(purchase.organizationId);
-    setCreatedPurchaseId(purchase.purchase.id);
+    // A retry after a failed run reuses the purchase already created rather
+    // than recording a second one.
+    let organizationId = createdOrgId;
+    let purchaseId = createdPurchaseId;
+    if (!organizationId || !purchaseId) {
+      const purchase = await createPurchase.mutateAsync({
+        billingDetails: details,
+        items,
+        total,
+        isExistingOrg: Boolean(preflight?.organization),
+        note: note.trim() || undefined,
+      });
+      organizationId = purchase.organizationId;
+      purchaseId = purchase.purchase.id;
+      setCreatedOrgId(organizationId);
+      setCreatedPurchaseId(purchaseId);
+    }
 
     const result = await runProvisioning.mutateAsync({
-      organizationId: purchase.organizationId,
-      purchaseId: purchase.purchase.id,
+      organizationId,
+      purchaseId,
       billingDetails: details,
       apps: selectedApps.map((app) => ({
         productId: app.productId,
@@ -150,11 +160,15 @@ export function ProvisioningPage() {
       })),
       mode,
     });
-    setProvisioned(true);
+    setFailures(result.errors);
 
+    // Login emails are only sent for apps that provisioned, so the success
+    // state must not be shown while any app failed.
     if (result.summary.failed > 0) {
       toastFailures(result.errors);
+      return;
     }
+    setProvisioned(true);
   };
 
   const historyColumns: DataTableColumn<ManualPurchase>[] = [
@@ -549,8 +563,11 @@ export function ProvisioningPage() {
 
               {createdPurchaseId && !provisioned && (
                 <Notice tone="warn">
-                  The purchase was created but provisioning did not finish. Use “Create and
-                  provision” again — the customer will not be duplicated.
+                  The purchase was created but provisioning did not finish
+                  {failures.length > 0 &&
+                    `: ${failures.map((failure) => failure.error ?? failure.productId).join('; ')}`}
+                  . No login email was sent. Use “Create and provision” again once the cause is
+                  fixed — the purchase and customer are reused, not duplicated.
                 </Notice>
               )}
             </div>
