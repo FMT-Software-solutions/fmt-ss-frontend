@@ -7,7 +7,10 @@ import { ReviewForm } from "@/components/reviews/ReviewForm"
 import { useAppBySlug } from "@/hooks/queries/useAppBySlug"
 import { useAppReviews } from "@/hooks/queries/useReviews"
 import { Badge, Button, Card, CardContent, Dialog, DialogContent, DialogTrigger, Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui"
-import { Check, Info, Laptop, Loader2, MessageSquare, ShieldCheck, ShoppingCart, Star, Maximize2 } from "lucide-react"
+import { Check, Info, Laptop, Loader2, MessageSquare, ShieldCheck, ShoppingCart, Sparkles, Star, Maximize2 } from "lucide-react"
+import { ReleaseNotes } from "@/components/marketplace/ReleaseNotes"
+import { AppBenefits, AppFaqs } from "@/components/marketplace/AppBenefits"
+import { formatReleaseDate } from "@/lib/release"
 import { useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import { SEO } from "@/components/seo"
@@ -46,15 +49,16 @@ export default function ItemDetailsPage() {
   const firstSector = sectors[0] as any
   const sectorId = firstSector?._id
 
+  const latest = app.releases?.[0]
   const mainImage = app?.mainImage
   const imageUrl = mainImage ? urlFor(mainImage)?.width(1200).height(630).url() : undefined
 
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title={app.title}
-        description={app.shortDescription}
-        image={imageUrl}
+        title={app.seo?.metaTitle || app.title}
+        description={app.seo?.metaDescription || app.shortDescription}
+        image={app.seo?.ogImage || imageUrl}
         type="product"
         schema={{
           "@context": "https://schema.org",
@@ -63,11 +67,12 @@ export default function ItemDetailsPage() {
           "description": app.shortDescription,
           "image": imageUrl,
           "applicationCategory": "BusinessApplication",
-          "operatingSystem": "All",
+          "operatingSystem": app.platforms?.web?.available ? "Windows, Web" : "Windows",
+          ...(latest ? { "softwareVersion": latest.version } : {}),
           "offers": {
             "@type": "Offer",
             "price": finalPrice,
-            "priceCurrency": "USD",
+            "priceCurrency": "GHS",
           }
         }}
       />
@@ -87,7 +92,10 @@ export default function ItemDetailsPage() {
                 )}
               </div>
 
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight">{app.title}</h1>
+              <div className="space-y-2">
+                <h1 className="text-4xl md:text-5xl font-bold tracking-tight">{app.title}</h1>
+                {app.tagline && <p className="text-xl font-medium text-primary">{app.tagline}</p>}
+              </div>
               <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl">
                 {app.shortDescription}
               </p>
@@ -115,6 +123,12 @@ export default function ItemDetailsPage() {
                   <Laptop className="h-4 w-4" />
                   <span>Instant Access</span>
                 </div>
+                {latest && (
+                  <div className="flex items-center gap-1">
+                    <Sparkles className="h-4 w-4" />
+                    <span>v{latest.version} · {formatReleaseDate(latest.releaseDate)}</span>
+                  </div>
+                )}
 
               </div>
             </div>
@@ -216,12 +230,16 @@ export default function ItemDetailsPage() {
         </div>
 
 
+        <AppBenefits app={app} />
+
         {/* Description & Details Tabs */}
         <section>
           <Tabs defaultValue="description" className="w-full">
             <TabsList className="w-full justify-start h-auto p-1 bg-muted/50 overflow-x-auto flex-nowrap">
               <TabsTrigger value="description" className="px-6 py-2.5">Description</TabsTrigger>
               <TabsTrigger value="features" className="px-6 py-2.5">Key Features</TabsTrigger>
+              {app.releases?.length ? <TabsTrigger value="releases" className="px-6 py-2.5">What's New</TabsTrigger> : null}
+              {app.faqs?.length ? <TabsTrigger value="faqs" className="px-6 py-2.5">FAQs</TabsTrigger> : null}
               <TabsTrigger value="requirements" className="px-6 py-2.5">System Requirements</TabsTrigger>
               <TabsTrigger value="reviews" className="px-6 py-2.5">Reviews</TabsTrigger>
             </TabsList>
@@ -249,6 +267,18 @@ export default function ItemDetailsPage() {
                   </div>
                 )}
               </TabsContent>
+
+              {app.releases?.length ? (
+                <TabsContent value="releases" className="pt-2">
+                  <ReleaseNotes releases={app.releases} />
+                </TabsContent>
+              ) : null}
+
+              {app.faqs?.length ? (
+                <TabsContent value="faqs">
+                  <AppFaqs faqs={app.faqs} />
+                </TabsContent>
+              ) : null}
 
               <TabsContent value="requirements" className="space-y-6">
                 {app.systemRequirements ? (

@@ -1,7 +1,8 @@
 import { useState } from "react"
 import type { IPremiumApp } from "@/types/premium-app"
 import { Button, Card } from "@repo/ui"
-import { CalendarClock, Download, ShoppingCart, ShieldCheck, Monitor, Smartphone, Globe } from "lucide-react"
+import { CalendarClock, Check, Download, MessageCircle, PlayCircle, ShoppingCart, ShieldCheck, Monitor, Smartphone, Globe } from "lucide-react"
+import { formatFileSize } from "@/lib/release"
 import { Link } from "react-router-dom"
 import { AccessRequestForm } from "./AccessRequestForm"
 import { PaymentPlanRequestForm } from "./PaymentPlanRequestForm"
@@ -19,6 +20,7 @@ export function GetAccessCard({ app, className }: GetAccessCardProps) {
   )
 
   const hasTrial = !app.isFree && app.hasTrialUsage
+  const latest = app.releases?.[0]
   const isFreeAccess = app.isFree && app.requiresAccount
 
   // Check available platforms
@@ -57,6 +59,38 @@ export function GetAccessCard({ app, className }: GetAccessCardProps) {
           </div>
         </div>
 
+        {app.whatsIncluded?.length ? (
+          <div>
+            <p className="text-sm font-medium text-muted-foreground mb-2">What's included</p>
+            <ul className="space-y-1.5 text-sm">
+              {app.whatsIncluded.map((item) => (
+                <li key={item} className="flex items-start gap-2">
+                  <Check className="h-4 w-4 shrink-0 mt-0.5 text-green-500" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {app.addOns?.length ? (
+          <div>
+            <p className="text-sm font-medium text-muted-foreground mb-2">Add-ons</p>
+            <ul className="space-y-1.5 text-sm">
+              {app.addOns.map((addOn) => (
+                <li key={addOn.name} className="flex justify-between gap-3">
+                  <span>{addOn.name}</span>
+                  {addOn.price != null && (
+                    <span className="shrink-0 text-muted-foreground">
+                      GHS {addOn.price}{addOn.unit ? ` / ${addOn.unit}` : ""}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
         {/* Requirements Notice */}
         {!accessGranted && app.isFree && (app.requiresAccount || hasTrial) && (
           <div className="flex items-start gap-2 text-sm text-amber-600 bg-amber-50 dark:bg-amber-950/30 dark:text-amber-400 p-3 rounded-md border border-amber-200 dark:border-amber-900/50">
@@ -71,6 +105,28 @@ export function GetAccessCard({ app, className }: GetAccessCardProps) {
       </div>
 
       <div className="mt-auto space-y-3">
+        {(app.contact?.whatsappNumber || app.contact?.demoUrl || app.contact?.bookingUrl) && (
+          <div className="flex flex-wrap gap-2">
+            {app.contact?.whatsappNumber && (
+              <Button asChild variant="outline" size="sm" className="flex-1 gap-2">
+                <a
+                  href={`https://wa.me/${app.contact.whatsappNumber}?text=${encodeURIComponent(`Hi, I'd like to know more about ${app.title}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MessageCircle className="h-4 w-4" /> WhatsApp
+                </a>
+              </Button>
+            )}
+            {(app.contact?.bookingUrl || app.contact?.demoUrl) && (
+              <Button asChild variant="outline" size="sm" className="flex-1 gap-2">
+                <a href={app.contact.bookingUrl || app.contact.demoUrl} target="_blank" rel="noopener noreferrer">
+                  <PlayCircle className="h-4 w-4" /> {app.contact.bookingUrl ? "Book a demo" : "Live demo"}
+                </a>
+              </Button>
+            )}
+          </div>
+        )}
         {accessGranted ? (
           <div className="grid gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <p className="text-sm font-medium text-muted-foreground mb-1">Download / Access Links:</p>
@@ -79,6 +135,11 @@ export function GetAccessCard({ app, className }: GetAccessCardProps) {
               <Button asChild variant="outline" className="w-full justify-start gap-2">
                 <a href={desktop.windows.downloadUrl} target="_blank" rel="noopener noreferrer">
                   <Download className="h-4 w-4" /> Download for Windows
+                  {latest && (
+                    <span className="ml-auto text-xs font-normal text-muted-foreground">
+                      v{latest.version}{formatFileSize(latest.fileSize) ? ` · ${formatFileSize(latest.fileSize)}` : ""}
+                    </span>
+                  )}
                 </a>
               </Button>
             )}
@@ -183,7 +244,7 @@ export function GetAccessCard({ app, className }: GetAccessCardProps) {
               </Button>
             )}
 
-            {!app.isFree && (
+            {!app.isFree && app.paymentPlans?.enabled !== false && (
               <PaymentPlanRequestForm
                 appId={app._id}
                 appName={app.title}

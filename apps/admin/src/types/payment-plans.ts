@@ -123,4 +123,6 @@ export interface PlanQuote {
   title: string;
   listPrice: number;
   price: number;
+  /** The app's instalment defaults from Sanity. */
+  defaults: { depositPercent: number; count: number; surchargePercent: number };
 }

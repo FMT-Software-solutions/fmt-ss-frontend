@@ -133,6 +133,33 @@ export interface IPremiumApp {
     price: number;
     promotion?: IPromotion;
     publishedAt?: string;
+    sortOrder?: number;
+    /** Newest first; filled in by each app's release script. */
+    releases?: IAppRelease[];
+    tagline?: string;
+    benefits?: { title: string; description?: string }[];
+    whatsIncluded?: string[];
+    faqs?: { question: string; answer: string }[];
+    trialDays?: number;
+    paymentPlans?: IPaymentPlanSettings;
+    addOns?: { name: string; description?: string; price?: number; unit?: string }[];
+    contact?: { whatsappNumber?: string; demoUrl?: string; bookingUrl?: string };
+    seo?: { metaTitle?: string; metaDescription?: string; ogImage?: string };
+}
+
+export interface IAppRelease {
+    version: string;
+    releaseDate?: string;
+    notes?: string;
+    downloadUrl?: string;
+    fileSize?: number;
+}
+
+export interface IPaymentPlanSettings {
+    enabled?: boolean;
+    minDepositPercent?: number;
+    maxInstalments?: number;
+    surchargePercent?: number;
 }
 
 // Type for the premium app list view (with fewer fields)

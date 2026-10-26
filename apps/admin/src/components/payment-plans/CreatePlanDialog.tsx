@@ -76,19 +76,23 @@ function PlanForm({
   );
   const [customerName, setCustomerName] = useState(request?.name ?? '');
   const [organizationName, setOrganizationName] = useState(request?.organization_name ?? '');
-  // Empty means "use the default": the app's current price, and 30% of the total.
+  // Empty means "use the app's default" (price and instalment settings in Sanity).
   const [priceInput, setPrice] = useState('');
-  const [surcharge, setSurcharge] = useState('0');
+  const [surchargeInput, setSurcharge] = useState('');
   const [depositInput, setDeposit] = useState('');
-  const [count, setCount] = useState('3');
+  const [countInput, setCount] = useState('');
   const [frequency, setFrequency] = useState<Frequency>('monthly');
   const [graceDays, setGraceDays] = useState('7');
   const [notes, setNotes] = useState('');
 
   const quote = usePlanQuote(appId || undefined);
+  const defaults = quote.data?.defaults ?? { depositPercent: 30, count: 3, surchargePercent: 0 };
   const price = priceInput === '' ? String(quote.data?.price ?? '') : priceInput;
+  const surcharge = surchargeInput === '' ? String(defaults.surchargePercent) : surchargeInput;
+  const count = countInput === '' ? String(defaults.count) : countInput;
   const total = totalWithSurcharge(num(price) || 0, num(surcharge) || 0);
-  const deposit = depositInput === '' ? (total > 0 ? String(Math.round(total * 0.3)) : '') : depositInput;
+  const deposit =
+    depositInput === '' ? (total > 0 ? String(Math.round((total * defaults.depositPercent) / 100)) : '') : depositInput;
 
   const schedule = useMemo(
     () => previewSchedule(total, num(deposit), Math.trunc(num(count)), frequency),
@@ -122,7 +126,7 @@ function PlanForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
           <Label>App</Label>
-          <Select value={appId} onValueChange={(value) => { setAppId(value); setPrice(''); setDeposit(''); }}>
+          <Select value={appId} onValueChange={(value) => { setAppId(value); setPrice(''); setDeposit(''); setSurcharge(''); setCount(''); }}>
             <SelectTrigger>
               <SelectValue placeholder="Choose an app" />
             </SelectTrigger>
