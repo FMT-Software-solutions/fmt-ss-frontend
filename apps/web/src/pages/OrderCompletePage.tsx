@@ -37,8 +37,9 @@ export default function OrderCompletePage() {
         setOrder(next);
         if (next.status === "completed") return setView("completed");
         if (next.status === "underpaid" || next.status === "failed") return setView("problem");
-      } catch {
+      } catch (error) {
         if (cancelled) return;
+        if ((error as { status?: number }).status === 404) return setView("missing");
       }
       if (Date.now() - started > GIVE_UP_MS) return setView("waiting");
       timer = setTimeout(poll, POLL_MS);

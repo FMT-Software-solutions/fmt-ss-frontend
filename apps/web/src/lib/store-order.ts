@@ -37,7 +37,7 @@ async function readJson<T>(response: Response): Promise<T> {
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
     const message = Array.isArray(body?.message) ? body.message[0] : body?.message;
-    throw new Error(message || "Something went wrong. Please try again.");
+    throw Object.assign(new Error(message || "Something went wrong. Please try again."), { status: response.status });
   }
   return body as T;
 }
