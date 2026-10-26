@@ -14,6 +14,7 @@ import TermsOfUsePage from "./pages/TermsOfUsePage"
 import SuccessPage from "./pages/SuccessPage"
 import PaymentCompletePage from "./pages/PaymentCompletePage"
 import OrderCompletePage from "./pages/OrderCompletePage"
+import PaymentPlanPage from "./pages/PaymentPlanPage"
 import { ErrorBoundary } from "./components/ui/error-boundary"
 
 const router = createBrowserRouter([
@@ -35,6 +36,11 @@ const router = createBrowserRouter([
         // hosted page); it polls the server, which confirms with the provider.
         path: "order-complete",
         element: <OrderCompletePage />,
+      },
+      {
+        // Payment plan link sent by email/SMS.
+        path: "plan/:token",
+        element: <PaymentPlanPage />,
       },
       {
         // Shared Paystack landing page for in-app purchases from any FMT

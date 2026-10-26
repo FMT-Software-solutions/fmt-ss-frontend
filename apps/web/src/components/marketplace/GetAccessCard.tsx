@@ -1,9 +1,10 @@
 import { useState } from "react"
 import type { IPremiumApp } from "@/types/premium-app"
 import { Button, Card } from "@repo/ui"
-import { Download, ShoppingCart, ShieldCheck, Monitor, Smartphone, Globe } from "lucide-react"
+import { CalendarClock, Download, ShoppingCart, ShieldCheck, Monitor, Smartphone, Globe } from "lucide-react"
 import { Link } from "react-router-dom"
 import { AccessRequestForm } from "./AccessRequestForm"
+import { PaymentPlanRequestForm } from "./PaymentPlanRequestForm"
 import { cn } from "@/lib/utils"
 
 interface GetAccessCardProps {
@@ -180,6 +181,18 @@ export function GetAccessCard({ app, className }: GetAccessCardProps) {
                   Buy Now <ShoppingCart className="h-4 w-4" />
                 </Link>
               </Button>
+            )}
+
+            {!app.isFree && (
+              <PaymentPlanRequestForm
+                appId={app._id}
+                appName={app.title}
+                trigger={
+                  <Button variant="ghost" className="w-full gap-2 text-muted-foreground hover:text-foreground">
+                    <CalendarClock className="h-4 w-4" /> Pay in instalments
+                  </Button>
+                }
+              />
             )}
           </div>
         )}

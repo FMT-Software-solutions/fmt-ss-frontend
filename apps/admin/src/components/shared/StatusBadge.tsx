@@ -18,6 +18,8 @@ const STATUS_TONES: Record<string, keyof typeof TONES> = {
   sent: 'positive',
   confirmed: 'positive',
   resolved: 'positive',
+  paid: 'positive',
+  planned: 'positive',
 
   pending: 'warning',
   unread: 'warning',
@@ -25,6 +27,9 @@ const STATUS_TONES: Record<string, keyof typeof TONES> = {
   requested: 'warning',
   reviewing: 'warning',
   'pending-customer-feedback': 'warning',
+  new: 'warning',
+  due: 'warning',
+  partial: 'warning',
 
   failed: 'negative',
   rejected: 'negative',
@@ -32,9 +37,14 @@ const STATUS_TONES: Record<string, keyof typeof TONES> = {
   expired: 'negative',
   inactive: 'negative',
   open: 'negative',
+  overdue: 'negative',
+  suspended: 'negative',
 
   read: 'neutral',
   archived: 'neutral',
+  draft: 'neutral',
+  declined: 'neutral',
+  upcoming: 'neutral',
 };
 
 interface StatusBadgeProps {

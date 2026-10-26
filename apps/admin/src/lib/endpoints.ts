@@ -41,6 +41,17 @@ export const API_ENDPOINTS = {
             confirmationEmail: `${API_BASE_URL}/admin/provisioning/confirmation-email`,
         },
         organizations: `${API_BASE_URL}/admin/organizations`,
+        paymentPlans: {
+            summary: `${API_BASE_URL}/admin/payment-plans/summary`,
+            list: `${API_BASE_URL}/admin/payment-plans`,
+            requests: `${API_BASE_URL}/admin/payment-plans/requests`,
+            request: (id: string) => `${API_BASE_URL}/admin/payment-plans/requests/${id}`,
+            quote: (appId: string) => `${API_BASE_URL}/admin/payment-plans/quote/${appId}`,
+            detail: (id: string) => `${API_BASE_URL}/admin/payment-plans/${id}`,
+            send: (id: string) => `${API_BASE_URL}/admin/payment-plans/${id}/send`,
+            payments: (id: string) => `${API_BASE_URL}/admin/payment-plans/${id}/payments`,
+            status: (id: string) => `${API_BASE_URL}/admin/payment-plans/${id}/status`,
+        },
         manualPurchases: {
             apps: `${API_BASE_URL}/admin/manual-purchases/apps`,
             create: `${API_BASE_URL}/admin/manual-purchases/create`,
