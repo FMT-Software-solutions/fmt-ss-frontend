@@ -13,6 +13,7 @@ import PrivacyPolicyPage from "./pages/PrivacyPolicyPage"
 import TermsOfUsePage from "./pages/TermsOfUsePage"
 import SuccessPage from "./pages/SuccessPage"
 import PaymentCompletePage from "./pages/PaymentCompletePage"
+import OrderCompletePage from "./pages/OrderCompletePage"
 import { ErrorBoundary } from "./components/ui/error-boundary"
 
 const router = createBrowserRouter([
@@ -28,6 +29,12 @@ const router = createBrowserRouter([
       {
         path: "success",
         element: <SuccessPage />,
+      },
+      {
+        // Website orders land here after paying (Paystack popup or Hubtel's
+        // hosted page); it polls the server, which confirms with the provider.
+        path: "order-complete",
+        element: <OrderCompletePage />,
       },
       {
         // Shared Paystack landing page for in-app purchases from any FMT

@@ -151,6 +151,8 @@ export interface IPremiumAppListItem {
     promotion?: {
         hasPromotion: boolean;
         discountPrice?: number;
+        startDate?: string;
+        endDate?: string;
         isActive: boolean;
     };
     publishedAt?: string;

@@ -1,7 +1,8 @@
 import { Card, Separator, Badge } from "@repo/ui";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { HubtelCheckoutButton } from "./HubtelCheckoutButton";
 import { PaystackButton } from "./PaystackButton";
+import type { StoreBillingDetails } from "@/lib/store-order";
 
 interface CartItem {
   productId: string;
@@ -19,51 +20,17 @@ interface OrderSummaryProps {
   items: CartItem[];
   total: number;
   subtotal: number;
-  email: string;
-  hubtelCheckoutPayload: any;
-  metadata: {
-    name: string;
-    phone: string;
-    custom_fields: Array<{
-      display_name: string;
-      variable_name: string;
-      value: string;
-    }>;
-  };
-  isProcessing: boolean;
   isValid: boolean;
-  onSuccess: (reference: any) => void;
-  onClose: () => void;
+  getBillingDetails: () => Promise<StoreBillingDetails | null>;
 }
 
-export function OrderSummary({
-  items,
-  total,
-  subtotal,
-  email,
-  hubtelCheckoutPayload,
-  metadata,
-  isProcessing,
-  isValid,
-  onSuccess,
-  onClose,
-}: OrderSummaryProps) {
-  const hubtelAvailable = true; // Should come from env or config
+const hubtelAvailable = import.meta.env.VITE_HUBTEL_ENABLED !== "false";
+
+export function OrderSummary({ items, total, subtotal, isValid, getBillingDetails }: OrderSummaryProps) {
   const [selectedMethod, setSelectedMethod] = useState<"primary" | "secondary">(
     hubtelAvailable ? "primary" : "secondary"
   );
-
-  const purchaseDescription = useMemo(() => {
-    if (items.length === 1 && items[0]?.product?.title) {
-      return `Payment for ${items[0].product.title}`;
-    }
-    return `Payment for ${items.length} items`;
-  }, [items]);
-
-  const handlePrimaryFailure = () => {
-    setSelectedMethod("secondary");
-    onClose();
-  };
+  const productIds = items.map((item) => item.productId);
 
   return (
     <Card className="p-6 sticky top-24">
@@ -105,42 +72,29 @@ export function OrderSummary({
       <div className="space-y-3 mb-6">
         <p className="text-sm font-medium">Payment Method</p>
         <div className="space-y-6">
-          <button
-            type="button"
-            onClick={() => hubtelAvailable && setSelectedMethod("primary")}
-            className={`w-full text-left border rounded-lg p-3 transition-colors ${selectedMethod === "primary"
-              ? "border-primary bg-primary/5 ring-1 ring-primary"
-              : "border-border hover:bg-muted/50"
-              } ${hubtelAvailable
-                ? "cursor-pointer"
-                : "cursor-not-allowed opacity-50"
-              }`}
-            disabled={!hubtelAvailable}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <img
-                src="/momo.png"
-                alt="MOMO payment"
-                className="h-8 object-contain"
-              />
-              <img
-                src="/card.png"
-                alt="Card payment"
-                className="h-8 object-contain"
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="font-medium">Primary payment method</span>
-              {selectedMethod === "primary" && (
-                <Badge variant="secondary" className="text-xs">
-                  Selected
-                </Badge>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Fast and secure checkout with Mobile Money or Card.
-            </p>
-          </button>
+          {hubtelAvailable && (
+            <button
+              type="button"
+              onClick={() => setSelectedMethod("primary")}
+              className={`w-full text-left border rounded-lg p-3 transition-colors cursor-pointer ${selectedMethod === "primary"
+                ? "border-primary bg-primary/5 ring-1 ring-primary"
+                : "border-border hover:bg-muted/50"
+                }`}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <img src="/momo.png" alt="MOMO payment" className="h-8 object-contain" />
+                <img src="/card.png" alt="Card payment" className="h-8 object-contain" />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-medium">Mobile Money or Card</span>
+                {selectedMethod === "primary" && (
+                  <Badge variant="secondary" className="text-xs">
+                    Selected
+                  </Badge>
+                )}
+              </div>
+            </button>
+          )}
 
           <button
             type="button"
@@ -150,17 +104,14 @@ export function OrderSummary({
               : "border-border hover:bg-muted/50"
               }`}
           >
-            <div className="flex items-center justify-between mb-1">
-              <span className="font-medium">Alternative payment method</span>
+            <div className="flex items-center justify-between">
+              <span className="font-medium">Paystack</span>
               {selectedMethod === "secondary" && (
                 <Badge variant="secondary" className="text-xs">
                   Selected
                 </Badge>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Secured by Paystack.
-            </p>
           </button>
         </div>
       </div>
@@ -168,29 +119,13 @@ export function OrderSummary({
       {selectedMethod === "primary" && hubtelAvailable ? (
         <HubtelCheckoutButton
           amount={total}
-          customerPhoneNumber={metadata.phone}
-          purchaseDescription={purchaseDescription}
-          checkoutPayload={hubtelCheckoutPayload}
-          onSuccess={onSuccess}
-          onFailure={handlePrimaryFailure}
-          onClose={onClose}
-          isProcessing={isProcessing}
+          productIds={productIds}
+          getBillingDetails={getBillingDetails}
+          onFailure={() => setSelectedMethod("secondary")}
           isValid={isValid}
-          email={email}
-          items={items}
         />
       ) : (
-        <PaystackButton
-          email={email}
-          amount={total}
-          metadata={metadata}
-          onSuccess={onSuccess}
-          onClose={onClose}
-          isProcessing={isProcessing}
-          isValid={isValid}
-          items={items}
-          checkoutPayload={hubtelCheckoutPayload}
-        />
+        <PaystackButton amount={total} productIds={productIds} getBillingDetails={getBillingDetails} isValid={isValid} />
       )}
     </Card>
   );

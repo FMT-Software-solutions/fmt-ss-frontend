@@ -17,9 +17,15 @@ export function getPriceDetails(
   const isFree = 'isFree' in app ? !!app.isFree : originalPrice === 0;
 
   const promotion = app.promotion;
+  // Same rule as the server: a promotion only counts inside its dates.
+  const now = new Date();
+  const inWindow =
+    (!promotion?.startDate || now >= new Date(promotion.startDate)) &&
+    (!promotion?.endDate || now <= new Date(promotion.endDate));
   const hasActivePromotion = !!(
     promotion?.hasPromotion &&
-    promotion?.isActive &&
+    promotion?.isActive !== false &&
+    inWindow &&
     promotion?.discountPrice &&
     promotion.discountPrice < originalPrice
   );

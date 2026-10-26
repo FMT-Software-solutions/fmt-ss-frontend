@@ -2,10 +2,10 @@ import {
   Form
 } from "@/components/ui/form";
 import { Lock } from "lucide-react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { client, groq } from "@/lib/sanity";
 import { checkoutSchema, type CheckoutFormData } from "@/lib/checkout-schema";
@@ -13,7 +13,7 @@ import { OrganizationDetailsForm } from "@/components/checkout/OrganizationDetai
 import { BillingAddressForm } from "@/components/checkout/BillingAddressForm";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { toast } from "sonner";
-import { API_BASE_URL } from "@/lib/endpoints";
+import type { StoreBillingDetails } from "@/lib/store-order";
 import { getPriceDetails } from "@/lib/pricing";
 
 const appByIdQuery = groq`
@@ -30,15 +30,17 @@ const appByIdQuery = groq`
       isActive
     },
     "mainImage": mainImage.asset->url,
-    "slug": slug.current,
-    appProvisioning
+    "slug": slug.current
   }
 `;
 
 export default function CheckoutPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("cancelled")) toast.info("Payment cancelled.");
+  }, [searchParams]);
 
   const { data: app, isLoading } = useQuery({
     queryKey: ["app", id],
@@ -71,92 +73,15 @@ export default function CheckoutPage() {
     mode: "onChange",
   });
 
-  const handlePaymentSuccess = async (paymentDetails: any) => {
-    // If it's Hubtel or Paystack, the purchase is already recorded by the Button/Backend flow
-    if (paymentDetails.method === 'hubtel' || paymentDetails.method === 'paystack') {
-      navigate(`/success?reference=${paymentDetails.reference}&type=payment`);
-      return;
+  /** Validates the form; the buyer details sent with the order, or null. */
+  const getBillingDetails = async (): Promise<StoreBillingDetails | null> => {
+    const ok = await form.trigger();
+    if (!ok) {
+      toast.error("Complete the required details.");
+      return null;
     }
-
-    // For others, we need to record it manually
-    setIsProcessing(true);
-    try {
-      const formData = form.getValues();
-      const { finalPrice } = getPriceDetails(app || {});
-      const purchasePayload = {
-        organizationDetails: {
-          ...formData.organizationDetails,
-          address: formData.billingAddress
-        },
-        items: [
-          {
-            productId: app?._id,
-            quantity: 1,
-            price: finalPrice,
-            title: app?.title
-          }
-        ],
-        total: finalPrice,
-        payment_reference: paymentDetails.reference,
-        status: 'completed',
-        paymentProvider: paymentDetails.method,
-        paymentMethod: paymentDetails.method,
-        paymentDetails: paymentDetails
-      };
-
-      const response = await fetch(`${API_BASE_URL}/purchases`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(purchasePayload)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to record purchase');
-      }
-
-      const purchaseData = await response.json();
-
-      // Trigger provisioning
-      await fetch(`${API_BASE_URL}/app-provisioning`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          organizationId: purchaseData.organization_id,
-          billingDetails: {
-            ...formData.organizationDetails,
-            address: formData.billingAddress
-          },
-          appProvisioningDetails: {
-            [app?._id]: {
-              productId: app?._id,
-              name: app?.title,
-              useSameEmailAsAdmin: true,
-              userEmail: formData.organizationDetails.organizationEmail,
-              supabaseUrl: app?.appProvisioning?.supabaseUrl,
-              supabaseAnonKey: app?.appProvisioning?.supabaseAnonKey,
-              edgeFunctionName: app?.appProvisioning?.edgeFunctionName
-            }
-          },
-          mode: 'buy'
-        })
-      });
-
-      toast.success("Purchase successful! Check your email for details.");
-      navigate(`/success?reference=${paymentDetails.reference}&type=payment`);
-    } catch (error) {
-      console.error("Purchase recording error:", error);
-      toast.error("Payment successful but failed to record purchase. Please contact support.");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handlePaymentClose = () => {
-    setIsProcessing(false);
+    const values = form.getValues();
+    return { ...values.organizationDetails, address: values.billingAddress };
   };
 
   if (isLoading) {
@@ -171,55 +96,13 @@ export default function CheckoutPage() {
   const { finalPrice: total, originalPrice } = getPriceDetails(app);
   const subtotal = total; // Add tax logic if needed
 
-  // Prepare Hubtel payload
-  const hubtelCheckoutPayload = {
-    billingDetails: {
-      ...form.getValues().organizationDetails,
-      address: form.getValues().billingAddress,
-    },
-    items: [
-      {
-        productId: app._id,
-        quantity: 1,
-        title: app.title,
-        price: total,
-        product: {
-          title: app.title,
-          price: total,
-          slug: app.slug
-        }
-      },
-    ],
-    total,
-    isExistingOrg: false, // Logic to detect existing org can be added
-    appProvisioningDetails: {
-      [app._id]: {
-        useSameEmailAsAdmin: true,
-        userEmail: form.getValues().organizationDetails.organizationEmail,
-        name: app.title,
-        supabaseUrl: app.appProvisioning?.supabaseUrl,
-        supabaseAnonKey: app.appProvisioning?.supabaseAnonKey,
-        edgeFunctionName: app.appProvisioning?.edgeFunctionName
-      },
-    },
-  };
-
-  // Update payload when form changes
-  const currentValues = form.watch();
-  const metadata = {
-    name: `${currentValues.organizationDetails.firstName} ${currentValues.organizationDetails.lastName}`,
-    phone: currentValues.organizationDetails.phoneNumber,
-    custom_fields: []
-  };
-
   return (
     <div className="container py-12">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Checkout Form */}
         <div className="lg:col-span-2 space-y-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Checkout</h1>
-            <p className="text-muted-foreground">Complete your purchase securely.</p>
+            <h1 className="text-3xl font-bold">Checkout</h1>
           </div>
 
           <Form {...form}>
@@ -255,13 +138,8 @@ export default function CheckoutPage() {
             ]}
             total={total}
             subtotal={subtotal}
-            email={currentValues.organizationDetails.organizationEmail}
-            hubtelCheckoutPayload={hubtelCheckoutPayload}
-            metadata={metadata}
-            isProcessing={isProcessing}
             isValid={form.formState.isValid}
-            onSuccess={handlePaymentSuccess}
-            onClose={handlePaymentClose}
+            getBillingDetails={getBillingDetails}
           />
         </div>
       </div>
