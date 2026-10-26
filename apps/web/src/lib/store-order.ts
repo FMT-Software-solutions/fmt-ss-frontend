@@ -23,7 +23,7 @@ export interface StoreBillingDetails {
 }
 
 export type CreatedOrder =
-  | { provider: "paystack"; reference: string; amount: number; currency: "GHS"; email: string; publicKey: string }
+  | { provider: "paystack"; reference: string; amount: number; currency: "GHS"; email: string }
   | { provider: "hubtel"; reference: string; amount: number; currency: "GHS"; checkoutUrl: string };
 
 export interface StoreOrderStatus {
