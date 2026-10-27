@@ -17,7 +17,7 @@ export default function LandingPage() {
       <HeroSection />
 
       {/* The hero's laptop overlaps into this section, hence the top padding. */}
-      <section className="bg-background relative z-0 pt-40 pb-12 md:pt-56 lg:pt-72">
+      <section className="bg-background relative z-0 pt-28 pb-12 sm:pt-40 md:pt-56 lg:pt-72">
         <div className="container px-4 md:px-6">
           <ValueStrip />
         </div>

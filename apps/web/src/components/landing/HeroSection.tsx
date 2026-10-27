@@ -3,6 +3,7 @@
 import { Button } from '@repo/ui';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { HeroDashboard } from './hero-dashboard/HeroDashboard';
 
 export default function HeroSection() {
   return (
@@ -50,20 +51,14 @@ export default function HeroSection() {
             </Button>
           </motion.div>
 
-          {/* Macbook Mockup */}
+          {/* Product dashboard */}
           <motion.div
             initial={{ opacity: 0, y: 40, rotateX: 20 }}
             animate={{ opacity: 1, y: 0, rotateX: 0 }}
             transition={{ duration: 1, delay: 0.4, ease: 'easeOut' }}
-            className="relative w-full max-w-5xl mt-16 -mb-48 lg:-mb-64 perspective-[2000px]"
+            className="relative w-full max-w-5xl mt-12 sm:mt-16 -mb-20 sm:-mb-32 md:-mb-48 lg:-mb-64 perspective-[2000px]"
           >
-            <div className="relative">
-              <img
-                src="https://res.cloudinary.com/deptmmxdn/image/upload/v1771610247/macbook-mockup_zb9yfv.png"
-                alt="App Dashboard Mockup"
-                className="w-full h-auto rounded-lg"
-              />
-            </div>
+            <HeroDashboard />
           </motion.div>
         </div>
       </div>
