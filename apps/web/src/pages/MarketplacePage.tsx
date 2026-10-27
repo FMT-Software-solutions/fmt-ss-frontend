@@ -1,13 +1,14 @@
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Badge, Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@repo/ui"
+import { Button, Input, Badge, Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@repo/ui"
 import { Search, Filter, Loader2 } from "lucide-react"
 import { useState, useMemo } from "react"
-import { Link } from "react-router-dom"
 import { useAllApps } from "@/hooks/queries/useAllApps"
 import { useSectors } from "@/hooks/queries/useSectors"
 import { FilterSidebar } from "@/components/marketplace/FilterSidebar"
 import { SortSelect } from "@/components/marketplace/SortSelect"
 import { SEO } from "@/components/seo"
 import { getPriceDetails } from "@/lib/pricing"
+import { sortRecommended } from "@/lib/apps"
+import { AppCard } from "@/components/marketplace/AppCard"
 
 export default function MarketplacePage() {
   const { data: apps = [], isLoading: isLoadingApps } = useAllApps()
@@ -18,7 +19,7 @@ export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
-  const [sortBy, setSortBy] = useState("date-desc")
+  const [sortBy, setSortBy] = useState("recommended")
 
   // Memoized Filter Logic
   const filteredApps = useMemo(() => {
@@ -29,7 +30,7 @@ export default function MarketplacePage() {
 
       // 2. Sector Filter
       const matchesSector = selectedSector
-        ? app.sectors?.some((s: any) => s.slug === selectedSector)
+        ? app.sectors?.some((s) => s.slug === selectedSector)
         : true
 
       // 3. Price Filter
@@ -42,6 +43,7 @@ export default function MarketplacePage() {
     })
 
     // Sorting Logic
+    if (sortBy === "recommended") return sortRecommended(filtered)
     return filtered.sort((a, b) => {
       switch (sortBy) {
         case "date-desc":
@@ -89,14 +91,13 @@ export default function MarketplacePage() {
     <div className="container py-12 min-h-screen">
       <SEO
         title="Marketplace"
-        description="Discover premium software tools, apps, and templates to accelerate your workflow and business growth."
+        description="Business software for Ghana: inventory, sales, printing and church management. Pay with Mobile Money or in instalments."
         keywords={['marketplace', 'software', 'apps', 'templates', 'tools', 'download']}
       />
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Software Marketplace</h1>
-          <p className="text-sm text-muted-foreground">Discover premium tools to accelerate your workflow.</p>
+          <h1 className="text-3xl font-bold">Software Marketplace</h1>
         </div>
 
         <div className="flex items-center gap-2 w-full md:w-auto">
@@ -178,80 +179,9 @@ export default function MarketplacePage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredApps.map((app) => {
-                const { finalPrice, originalPrice, hasActivePromotion, discountPercentage, isFree } = getPriceDetails(app);
-
-                return (
-                  <Link key={app._id} to={`/marketplace/${app.slug}`} className="group h-full">
-                    <Card className="overflow-hidden flex flex-col h-full hover:shadow-lg transition-all duration-300 border-transparent hover:border-primary/20">
-                      <div className="aspect-video bg-muted relative overflow-hidden">
-                        {app.mainImage ? (
-                          <img
-                            src={app.mainImage}
-                            alt={app.title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-secondary text-secondary-foreground">
-                            <span className="text-sm font-medium">No Image</span>
-                          </div>
-                        )}
-
-                        {/* Badges */}
-                        <div className="absolute top-2 right-2 flex flex-col gap-2 items-end">
-                          {app.sectors?.slice(0, 1).map((sector: any) => (
-                            <Badge key={sector._id} className="bg-background/90 text-foreground backdrop-blur-sm shadow-sm hover:bg-background">
-                              {sector.name}
-                            </Badge>
-                          ))}
-                        </div>
-
-                        {hasActivePromotion && (
-                          <div className="absolute top-2 left-2">
-                            <Badge className="backdrop-blur-sm shadow-sm bg-green-600 hover:bg-green-700 text-white border-none">
-                              -{discountPercentage}% Off
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-
-                      <CardHeader className="p-4 pb-2">
-                        <div className="flex justify-between items-start gap-2">
-                          <CardTitle className="text-lg line-clamp-1 group-hover:text-primary transition-colors">
-                            {app.title}
-                          </CardTitle>
-                        </div>
-                        <CardDescription className="line-clamp-2 text-sm mt-1 min-h-10">
-                          {app.shortDescription}
-                        </CardDescription>
-                      </CardHeader>
-
-                      <CardContent className="p-4 pt-0 mt-auto">
-                        <div className="flex items-center justify-between pt-4 border-t mt-2">
-                          <div className="flex flex-col">
-                            {isFree ? (
-                              <span className="font-bold text-lg text-green-600">Free</span>
-                            ) : (
-                              <div className="flex items-baseline gap-2">
-                                <span className="font-bold text-lg">
-                                  GHS {finalPrice}
-                                </span>
-                                {hasActivePromotion && (
-                                  <span className="text-xs text-muted-foreground line-through">
-                                    GHS {originalPrice}
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                )
-              })}
+              {filteredApps.map((app) => (
+                <AppCard key={app._id} app={app} />
+              ))}
             </div>
           )}
         </div>

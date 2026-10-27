@@ -23,16 +23,15 @@ export default function HeroSection() {
             className="space-y-4"
           >
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-              Innovative Software
+              Software that runs
               <br />
               <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-primary/80  dark:to-primary/70">
-                Solutions
+                your business
               </span>
             </h1>
 
             <p className="mx-auto max-w-175 text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-              We build scalable, high-performance web applications tailored to your business needs.
-              Experience the future of software development with us.
+              Inventory, sales, printing and church management apps. Try free, then pay with Mobile Money.
             </p>
           </motion.div>
 
@@ -44,12 +43,10 @@ export default function HeroSection() {
             className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
           >
             <Button asChild size="lg">
-              <Link to="/marketplace">
-                Marketplace
-              </Link>
+              <a href="#apps">Browse apps</a>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/request-quote">Request Quote</Link>
+              <Link to="/request-quote">Custom software</Link>
             </Button>
           </motion.div>
 

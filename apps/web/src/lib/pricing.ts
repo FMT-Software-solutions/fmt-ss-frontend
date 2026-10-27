@@ -9,7 +9,7 @@ export interface PriceDetails {
 }
 
 export function getPriceDetails(
-  app: Partial<IPremiumApp> | Partial<IPremiumAppListItem>
+  app: Partial<Pick<IPremiumApp, 'price' | 'isFree' | 'promotion'>> | Partial<IPremiumAppListItem>
 ): PriceDetails {
   const originalPrice = app.price || 0;
   

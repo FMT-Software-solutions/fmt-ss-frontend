@@ -1,8 +1,7 @@
 import HeroSection from "@/components/landing/HeroSection"
-import { FeaturedApps } from "@/components/landing/FeaturedApps"
-import { WebAppsSection } from "@/components/landing/WebAppsSection"
-import { DesktopAppsSection } from "@/components/landing/DesktopAppsSection"
-import { MobileAppsSection } from "@/components/landing/MobileAppsSection"
+import { ValueStrip } from "@/components/landing/ValueStrip"
+import { AppsShowcase } from "@/components/landing/AppsShowcase"
+import { CustomSoftwareSection } from "@/components/landing/CustomSoftwareSection"
 import { TestimonialsCarousel } from "@/components/landing/TestimonialsCarousel"
 import { NewsletterSection } from "@/components/landing/NewsletterSection"
 import { SEO } from "@/components/seo"
@@ -10,36 +9,24 @@ import { SEO } from "@/components/seo"
 export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
-      <SEO 
+      <SEO
         title="Home"
-        description="FMT Software Solutions provides custom software solutions, web applications, and enterprise tools to help businesses grow."
-        keywords={['software', 'web development', 'mobile apps', 'enterprise software', 'FMT Software']}
+        description="Business software for Ghana: inventory, sales, printing and church management apps. Free trials, Mobile Money and instalments."
+        keywords={['inventory software Ghana', 'POS', 'church management', 'printing business software', 'FMT Software']}
       />
-      {/* Hero Section */}
       <HeroSection />
 
-      {/* Trusted By / Placeholder for White Region */}
-      <section className="hidden md:block py-20 lg:py-32 bg-background relative z-0">
-        <div className="container px-4 md:px-6 pt-32 lg:pt-48">
-          <div className="max-w-3xl mx-auto text-center space-y-4">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Trusted by Business and Organizations</h2>
-            <p className="text-muted-foreground">We provide custom software solutions that help businesses and organizations achieve their goals.</p>
-          </div>
+      {/* The hero's laptop overlaps into this section, hence the top padding. */}
+      <section className="bg-background relative z-0 pt-40 pb-12 md:pt-56 lg:pt-72">
+        <div className="container px-4 md:px-6">
+          <ValueStrip />
         </div>
       </section>
 
-      <div className="block md:hidden py-20" />
-
-      {/* Featured Apps Section */}
-      <FeaturedApps />
-
-      <WebAppsSection />
-      <DesktopAppsSection />
-      <MobileAppsSection />
-
+      <AppsShowcase />
+      <CustomSoftwareSection />
       <TestimonialsCarousel />
       <NewsletterSection />
-
     </div>
   )
 }

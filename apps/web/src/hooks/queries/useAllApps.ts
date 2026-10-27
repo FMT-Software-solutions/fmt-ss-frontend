@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { client, groq } from '@/lib/sanity';
-import type { IPremiumApp } from '@/types/premium-app';
+import type { MarketplaceApp } from '@/lib/apps';
 
 export interface FilterParams {
   search?: string;
@@ -16,7 +16,15 @@ const allAppsQuery = groq`
     "slug": slug.current,
     price,
     isFree,
+    featured,
+    sortOrder,
+    hasTrialUsage,
+    trialDays,
+    "paymentPlans": paymentPlans{ enabled },
+    "platforms": platforms{ desktop{ windows{ available } }, web{ available } },
+    "releases": releases[0...1]{ version, releaseDate },
     publishedAt,
+    tagline,
     shortDescription,
     "mainImage": mainImage.asset->url,
     "sectors": sectors[]->{
@@ -38,7 +46,7 @@ export function useAllApps() {
   return useQuery({
     queryKey: ['allApps'],
     queryFn: async () => {
-      const data = await client.fetch<IPremiumApp[]>(allAppsQuery);
+      const data = await client.fetch<MarketplaceApp[]>(allAppsQuery);
       return data || [];
     },
   });

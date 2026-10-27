@@ -12,6 +12,7 @@ export function SortSelect({ value, onValueChange }: SortSelectProps) {
         <SelectValue placeholder="Sort by" />
       </SelectTrigger>
       <SelectContent>
+        <SelectItem value="recommended">Recommended</SelectItem>
         <SelectItem value="date-desc">Newest First</SelectItem>
         <SelectItem value="date-asc">Oldest First</SelectItem>
         <SelectItem value="price-desc">Price: High to Low</SelectItem>
