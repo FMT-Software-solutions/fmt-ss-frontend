@@ -14,9 +14,10 @@ interface SEOProps {
 }
 
 const DEFAULT_TITLE = 'FMT Software Solutions';
-const DEFAULT_DESCRIPTION = 'FMT Software Solutions provides cutting-edge software solutions for businesses, including web development, mobile apps, and enterprise software.';
-const DEFAULT_IMAGE = 'https://res.cloudinary.com/deptmmxdn/image/upload/v1772145436/fmt-software_nllgue.png';
-const DEFAULT_URL = 'https://fmtsoftware.com'; // Placeholder
+const DEFAULT_DESCRIPTION = 'Business software for Ghana: inventory, sales, printing and church management apps. Free trials, Mobile Money and instalments.';
+// Same image the edge function (netlify/edge-functions/page-meta.ts) serves to link previews.
+const DEFAULT_IMAGE = 'https://fmtsoftware.com/og/fmt-default.jpg';
+const DEFAULT_URL = 'https://fmtsoftware.com';
 const DEFAULT_SITE_NAME = 'FMT Software Solutions';
 const DEFAULT_TWITTER_HANDLE = '@fmtsoftware'; // Placeholder
 

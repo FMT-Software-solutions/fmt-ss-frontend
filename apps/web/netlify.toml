@@ -1,6 +1,8 @@
 [build]
   command = "pnpm build"
   publish = "apps/web/dist"
+  # Per-page link previews (paths are relative to the repo root, the base directory).
+  edge_functions = "apps/web/netlify/edge-functions"
 
 [[redirects]]
   from = "/*"
