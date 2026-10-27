@@ -60,10 +60,12 @@ interface SanityApp {
   promotion?: { hasPromotion?: boolean; isActive?: boolean; discountPrice?: number; startDate?: string; endDate?: string };
   seo?: { metaTitle?: string; metaDescription?: string; ogImage?: string };
   mainImage?: string;
+  latestVersion?: string;
 }
 
 const APP_FIELDS = `{ title, tagline, shortDescription, price, isFree, promotion,
-  seo{ metaTitle, metaDescription, "ogImage": ogImage.asset->url }, "mainImage": mainImage.asset->url }`;
+  seo{ metaTitle, metaDescription, "ogImage": ogImage.asset->url }, "mainImage": mainImage.asset->url,
+  "latestVersion": releases[defined(version)] | order(releaseDate desc)[0].version }`;
 
 async function fetchApp(filter: string, params: Record<string, string>): Promise<SanityApp | null> {
   const url = new URL(SANITY);
@@ -116,6 +118,20 @@ export async function metaFor(pathname: string): Promise<PageMeta> {
   if (app) {
     const found = await fetchApp("slug.current == $slug", { slug: decodeURIComponent(app[1]) }).catch(() => null);
     return found ? appMeta(found) : base;
+  }
+
+  const download = path.match(/^\/marketplace\/([^/]+)\/download$/);
+  if (download) {
+    const found = await fetchApp("slug.current == $slug", { slug: decodeURIComponent(download[1]) }).catch(() => null);
+    if (!found) return base;
+    const version = found.latestVersion ? ` ${found.latestVersion}` : "";
+    return {
+      ...appMeta(found),
+      title: `Download ${found.title}${version} | ${SITE_NAME}`,
+      description: `Download ${found.title}${version} for Windows, plus every earlier version with its release notes.`,
+      type: "website",
+      price: undefined,
+    };
   }
 
   const checkout = path.match(/^\/checkout\/([^/]+)$/);

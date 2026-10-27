@@ -5,7 +5,7 @@ import { formatReleaseDate } from "@/lib/release"
  * The small Markdown subset the release scripts write: ### headings, "- "
  * bullets, **bold** and plain lines.
  */
-function Markdown({ text }: { text: string }) {
+export function ReleaseNotesBody({ text }: { text: string }) {
   const blocks: React.ReactNode[] = []
   let list: string[] = []
   const flush = () => {
@@ -56,7 +56,7 @@ export function ReleaseNotes({ releases }: { releases: IAppRelease[] }) {
             <span className="text-sm text-muted-foreground">{formatReleaseDate(release.releaseDate)}</span>
             {i === 0 && <span className="text-xs font-medium text-primary">Latest</span>}
           </div>
-          {release.notes ? <Markdown text={release.notes} /> : null}
+          {release.notes ? <ReleaseNotesBody text={release.notes} /> : null}
         </li>
       ))}
     </ol>

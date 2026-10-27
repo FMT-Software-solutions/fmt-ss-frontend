@@ -7,7 +7,7 @@ import { ReviewForm } from "@/components/reviews/ReviewForm"
 import { useAppBySlug } from "@/hooks/queries/useAppBySlug"
 import { useAppReviews } from "@/hooks/queries/useReviews"
 import { Badge, Button, Card, CardContent, Dialog, DialogContent, DialogTrigger, Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui"
-import { Check, Info, Laptop, Loader2, MessageSquare, ShieldCheck, ShoppingCart, Sparkles, Star, Maximize2 } from "lucide-react"
+import { Check, Download, Info, Laptop, Loader2, MessageSquare, ShieldCheck, ShoppingCart, Sparkles, Star, Maximize2 } from "lucide-react"
 import { ReleaseNotes } from "@/components/marketplace/ReleaseNotes"
 import { AppBenefits, AppFaqs } from "@/components/marketplace/AppBenefits"
 import { formatReleaseDate } from "@/lib/release"
@@ -110,6 +110,13 @@ export default function ItemDetailsPage() {
                     </Button>
                   </>
                 }
+                {latest?.downloadUrl && (
+                  <Button size="lg" variant="outline" className="gap-2 px-6" asChild>
+                    <Link to={`/marketplace/${slug}/download`}>
+                      Download <Download className="h-5 w-5" />
+                    </Link>
+                  </Button>
+                )}
               </div>
 
               <div className="flex items-center gap-6 text-sm text-muted-foreground pt-2">
@@ -124,10 +131,10 @@ export default function ItemDetailsPage() {
                   <span>Instant Access</span>
                 </div>
                 {latest && (
-                  <div className="flex items-center gap-1">
+                  <Link to={`/marketplace/${slug}/download`} className="flex items-center gap-1 hover:text-foreground transition-colors">
                     <Sparkles className="h-4 w-4" />
                     <span>v{latest.version} · {formatReleaseDate(latest.releaseDate)}</span>
-                  </div>
+                  </Link>
                 )}
 
               </div>

@@ -3,6 +3,7 @@ import Layout from "./components/layout/Layout"
 import LandingPage from "./pages/LandingPage"
 import MarketplacePage from "./pages/MarketplacePage"
 import ItemDetailsPage from "./pages/ItemDetailsPage"
+import AppDownloadsPage from "./pages/AppDownloadsPage"
 import CheckoutPage from "./pages/CheckoutPage"
 import RequestQuotePage from "./pages/RequestQuotePage"
 import AboutPage from "./pages/AboutPage"
@@ -56,6 +57,10 @@ const router = createBrowserRouter([
       {
         path: "marketplace/:slug",
         element: <ItemDetailsPage />,
+      },
+      {
+        path: "marketplace/:slug/download",
+        element: <AppDownloadsPage />,
       },
       {
         path: "checkout/:id",
