@@ -1,8 +1,9 @@
-import { Card, Separator, Badge } from "@repo/ui";
+import { Card, Separator, Badge, Button, Input } from "@repo/ui";
 import { useState } from "react";
+import { Loader2, X } from "lucide-react";
 import { HubtelCheckoutButton } from "./HubtelCheckoutButton";
 import { PaystackButton } from "./PaystackButton";
-import type { StoreBillingDetails } from "@/lib/store-order";
+import { quoteStoreOrder, type StoreBillingDetails, type StoreQuote } from "@/lib/store-order";
 
 interface CartItem {
   productId: string;
@@ -22,15 +23,46 @@ interface OrderSummaryProps {
   subtotal: number;
   isValid: boolean;
   getBillingDetails: () => Promise<StoreBillingDetails | null>;
+  /** Buyer email so per-customer code limits are checked before paying. */
+  email?: string;
+  /** From ?code= in the link. */
+  initialCode?: string;
 }
 
 const hubtelAvailable = import.meta.env.VITE_HUBTEL_ENABLED !== "false";
 
-export function OrderSummary({ items, total, subtotal, isValid, getBillingDetails }: OrderSummaryProps) {
+export function OrderSummary({ items, total, subtotal, isValid, getBillingDetails, email, initialCode }: OrderSummaryProps) {
+  const [codeInput, setCodeInput] = useState(initialCode ?? "");
+  const [quote, setQuote] = useState<StoreQuote | null>(null);
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<"primary" | "secondary">(
     hubtelAvailable ? "primary" : "secondary"
   );
   const productIds = items.map((item) => item.productId);
+  const discount = quote?.discount ?? null;
+  const payable = discount ? quote!.total : total;
+
+  // The server prices the code; this only shows the buyer what it will charge.
+  const applyCode = async () => {
+    const code = codeInput.trim();
+    if (!code) return;
+    setChecking(true);
+    setCodeError(null);
+    try {
+      setQuote(await quoteStoreOrder({ productIds, discountCode: code, email: email || undefined }));
+    } catch (error) {
+      setQuote(null);
+      setCodeError((error as Error).message);
+    } finally {
+      setChecking(false);
+    }
+  };
+  const removeCode = () => {
+    setQuote(null);
+    setCodeInput("");
+    setCodeError(null);
+  };
 
   return (
     <Card className="p-6 sticky top-24">
@@ -61,10 +93,38 @@ export function OrderSummary({ items, total, subtotal, isValid, getBillingDetail
             <span>Subtotal</span>
             <span>GHS {subtotal.toFixed(2)}</span>
           </div>
+          {discount && (
+            <div className="flex justify-between items-center text-green-600">
+              <span className="flex items-center gap-1">
+                {discount.code}
+                <button type="button" onClick={removeCode} aria-label="Remove code" className="text-muted-foreground hover:text-foreground">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </span>
+              <span>− GHS {discount.amount.toFixed(2)}</span>
+            </div>
+          )}
+          {!discount && (
+            <div className="space-y-1">
+              <div className="flex gap-2">
+                <Input
+                  value={codeInput}
+                  onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), applyCode())}
+                  placeholder="Discount code"
+                  className="h-9"
+                />
+                <Button type="button" variant="outline" size="sm" className="h-9" onClick={applyCode} disabled={checking || !codeInput.trim()}>
+                  {checking ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
+                </Button>
+              </div>
+              {codeError && <p className="text-xs text-destructive">{codeError}</p>}
+            </div>
+          )}
           <Separator />
           <div className="flex justify-between font-semibold text-lg">
             <span>Total</span>
-            <span>GHS {total.toFixed(2)}</span>
+            <span>GHS {payable.toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -118,14 +178,15 @@ export function OrderSummary({ items, total, subtotal, isValid, getBillingDetail
 
       {selectedMethod === "primary" && hubtelAvailable ? (
         <HubtelCheckoutButton
-          amount={total}
+          amount={payable}
+          discountCode={discount?.code}
           productIds={productIds}
           getBillingDetails={getBillingDetails}
           onFailure={() => setSelectedMethod("secondary")}
           isValid={isValid}
         />
       ) : (
-        <PaystackButton amount={total} productIds={productIds} getBillingDetails={getBillingDetails} isValid={isValid} />
+        <PaystackButton amount={payable} productIds={productIds} getBillingDetails={getBillingDetails} discountCode={discount?.code} isValid={isValid} />
       )}
     </Card>
   );

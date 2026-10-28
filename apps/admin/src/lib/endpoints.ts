@@ -41,6 +41,10 @@ export const API_ENDPOINTS = {
             confirmationEmail: `${API_BASE_URL}/admin/provisioning/confirmation-email`,
         },
         organizations: `${API_BASE_URL}/admin/organizations`,
+        discountCodes: {
+            list: `${API_BASE_URL}/admin/discount-codes`,
+            detail: (id: string) => `${API_BASE_URL}/admin/discount-codes/${id}`,
+        },
         paymentPlans: {
             summary: `${API_BASE_URL}/admin/payment-plans/summary`,
             list: `${API_BASE_URL}/admin/payment-plans`,

@@ -3,7 +3,7 @@ import {
 } from "@/components/ui/form";
 import { Lock } from "lucide-react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -53,13 +53,15 @@ export default function CheckoutPage() {
 
   const form = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
+    // Apps link here with ?email=&org=&phone=&name= so upgrading from a trial
+    // starts with the organization's details filled in.
     defaultValues: {
       organizationDetails: {
-        firstName: "",
-        lastName: "",
-        organizationName: "",
-        organizationEmail: "",
-        phoneNumber: "",
+        firstName: (searchParams.get("name") ?? "").split(" ")[0],
+        lastName: (searchParams.get("name") ?? "").split(" ").slice(1).join(" "),
+        organizationName: searchParams.get("org") ?? "",
+        organizationEmail: searchParams.get("email") ?? "",
+        phoneNumber: searchParams.get("phone") ?? "",
       },
       billingAddress: {
         street: "",
@@ -72,6 +74,7 @@ export default function CheckoutPage() {
     },
     mode: "onChange",
   });
+  const buyerEmail = useWatch({ control: form.control, name: "organizationDetails.organizationEmail" });
 
   /** Validates the form; the buyer details sent with the order, or null. */
   const getBillingDetails = async (): Promise<StoreBillingDetails | null> => {
@@ -140,6 +143,8 @@ export default function CheckoutPage() {
             subtotal={subtotal}
             isValid={form.formState.isValid}
             getBillingDetails={getBillingDetails}
+            email={buyerEmail}
+            initialCode={searchParams.get("code") ?? undefined}
           />
         </div>
       </div>

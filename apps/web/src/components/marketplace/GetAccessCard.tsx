@@ -2,7 +2,8 @@ import { useState } from "react"
 import type { IPremiumApp } from "@/types/premium-app"
 import { Button, Card } from "@repo/ui"
 import { CalendarClock, Check, Download, MessageCircle, PlayCircle, ShoppingCart, ShieldCheck, Monitor, Smartphone, Globe } from "lucide-react"
-import { formatFileSize } from "@/lib/release"
+import { formatFileSize, formatReleaseDate } from "@/lib/release"
+import { readAccess, rememberAccess } from "@/lib/app-access"
 import { Link } from "react-router-dom"
 import { AccessRequestForm } from "./AccessRequestForm"
 import { PaymentPlanRequestForm } from "./PaymentPlanRequestForm"
@@ -14,10 +15,15 @@ interface GetAccessCardProps {
 }
 
 export function GetAccessCard({ app, className }: GetAccessCardProps) {
-  // If app is free and doesn't require account, access is granted by default
-  const [accessGranted, setAccessGranted] = useState(
-    app.isFree && !app.requiresAccount
-  )
+  // Free apps without accounts are open to everyone; otherwise remember a
+  // trial or free access started in this browser.
+  const [remembered, setRemembered] = useState(() => readAccess(app._id))
+  const accessGranted = (app.isFree && !app.requiresAccount) || !!remembered
+  const grant = (mode: "trial" | "free") => (result: { email: string; trialEndsAt?: string }) => {
+    const access = { mode, email: result.email, trialEndsAt: result.trialEndsAt }
+    rememberAccess(app._id, access)
+    setRemembered(access)
+  }
 
   const hasTrial = !app.isFree && app.hasTrialUsage
   const latest = app.releases?.[0]
@@ -129,6 +135,11 @@ export function GetAccessCard({ app, className }: GetAccessCardProps) {
         )}
         {accessGranted ? (
           <div className="grid gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {remembered?.trialEndsAt && (
+              <p className="text-sm">
+                Trial active until <span className="font-medium">{formatReleaseDate(remembered.trialEndsAt)}</span>
+              </p>
+            )}
             <p className="text-sm font-medium text-muted-foreground mb-1">Download / Access Links:</p>
 
             {hasWindows && desktop?.windows?.downloadUrl && (
@@ -210,7 +221,7 @@ export function GetAccessCard({ app, className }: GetAccessCardProps) {
                 appId={app._id}
                 appName={app.title}
                 mode="free"
-                onSuccess={() => setAccessGranted(true)}
+                onSuccess={grant("free")}
                 trigger={
                   <Button size="lg" className="w-full gap-2">
                     <Download className="h-4 w-4" />
@@ -226,7 +237,7 @@ export function GetAccessCard({ app, className }: GetAccessCardProps) {
                 appId={app._id}
                 appName={app.title}
                 mode="trial"
-                onSuccess={() => setAccessGranted(true)}
+                onSuccess={grant("trial")}
                 trigger={
                   <Button variant="outline" size="lg" className="w-full gap-2 border-primary/20 hover:bg-primary/5 hover:text-primary">
                     Start Free Trial

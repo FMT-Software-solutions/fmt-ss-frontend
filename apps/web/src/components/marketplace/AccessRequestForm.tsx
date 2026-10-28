@@ -16,7 +16,8 @@ interface AccessRequestFormProps {
   appName: string
   mode: 'trial' | 'free'
   trigger?: React.ReactNode
-  onSuccess?: () => void
+  /** Gets the email used and, for trials, when the trial ends. */
+  onSuccess?: (result: { email: string; trialEndsAt?: string }) => void
 }
 
 export function AccessRequestForm({ appId, mode, trigger, onSuccess }: AccessRequestFormProps) {
@@ -89,7 +90,9 @@ export function AccessRequestForm({ appId, mode, trigger, onSuccess }: AccessReq
         throw new Error(errorData.message || "Failed to submit request")
       }
 
-      toast.success(mode === 'trial' ? "Trial request submitted successfully!" : "Access granted successfully!")
+      const result = await response.json().catch(() => ({}))
+      const email = formData.organizationEmail
+      toast.success(mode === 'trial' ? "Your trial has started. Check your email for login details." : "Access granted. Check your email for login details.")
       setFormData({
         organizationName: "",
         organizationEmail: "",
@@ -97,7 +100,7 @@ export function AccessRequestForm({ appId, mode, trigger, onSuccess }: AccessReq
       })
       setAgreedToTerms(false)
       setIsOpen(false)
-      if (onSuccess) onSuccess()
+      onSuccess?.({ email, trialEndsAt: result?.trialEndsAt })
     } catch (error) {
       console.error("Request error:", error)
       toast.error(error instanceof Error ? error.message : "Failed to submit request")

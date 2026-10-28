@@ -42,10 +42,27 @@ async function readJson<T>(response: Response): Promise<T> {
   return body as T;
 }
 
+export interface StoreQuote {
+  subtotal: number;
+  total: number;
+  discount: { code: string; amount: number; description: string | null } | null;
+}
+
+/** Server price for the summary; throws with the reason if the code is rejected. */
+export async function quoteStoreOrder(input: { productIds: string[]; discountCode?: string; email?: string }) {
+  const response = await fetch(`${API_BASE_URL}/payments/orders/quote`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  return readJson<StoreQuote>(response);
+}
+
 export async function createStoreOrder(input: {
   productIds: string[];
   billingDetails: StoreBillingDetails;
   provider: StoreProvider;
+  discountCode?: string;
 }) {
   const response = await fetch(`${API_BASE_URL}/payments/orders`, {
     method: "POST",

@@ -8,6 +8,7 @@ import { MessagesPage } from '@/pages/site/MessagesPage';
 import { QuotesPage } from '@/pages/site/QuotesPage';
 import { PurchasesPage } from '@/pages/site/PurchasesPage';
 import { PaymentPlansPage } from '@/pages/plans/PaymentPlansPage';
+import { DiscountCodesPage } from '@/pages/site/DiscountCodesPage';
 import { PaymentPlanDetailPage } from '@/pages/plans/PaymentPlanDetailPage';
 import { ReviewsPage } from '@/pages/site/ReviewsPage';
 import { NewsletterPage } from '@/pages/site/NewsletterPage';
@@ -41,6 +42,7 @@ const router = createBrowserRouter([
           { path: '/site/quotes', element: <QuotesPage /> },
           { path: '/site/purchases', element: <PurchasesPage /> },
           { path: '/plans', element: <PaymentPlansPage /> },
+          { path: '/site/discount-codes', element: <DiscountCodesPage /> },
           { path: '/plans/:id', element: <PaymentPlanDetailPage /> },
           { path: '/site/reviews', element: <ReviewsPage /> },
           { path: '/site/newsletter', element: <NewsletterPage /> },

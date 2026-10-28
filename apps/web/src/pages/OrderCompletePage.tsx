@@ -5,6 +5,7 @@ import { AlertCircle, CheckCircle2, Clock, Loader2 } from "lucide-react";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import { getStoreOrder, type StoreOrderStatus } from "@/lib/store-order";
+import { PurchasedApps } from "@/components/checkout/PurchasedApps";
 
 const POLL_MS = 3000;
 const GIVE_UP_MS = 3 * 60 * 1000;
@@ -52,7 +53,6 @@ export default function OrderCompletePage() {
     };
   }, [reference, attempt]);
 
-  const titles = order?.items.map((i) => i.title).filter(Boolean).join(", ");
 
   const content: Record<View, { icon: ReactNode; title: string; body?: string }> = {
     checking: {
@@ -62,7 +62,7 @@ export default function OrderCompletePage() {
     completed: {
       icon: <CheckCircle2 className="h-16 w-16 text-green-500" />,
       title: "Payment successful",
-      body: `${titles ? `${titles} is ready. ` : ""}Your login details are on the way to your email.`,
+      body: "Your login details are on the way to your email.",
     },
     problem: {
       icon: <AlertCircle className="h-14 w-14 text-destructive" />,
@@ -93,7 +93,8 @@ export default function OrderCompletePage() {
           {body && <CardDescription>{body}</CardDescription>}
         </CardHeader>
         {reference && (
-          <CardContent>
+          <CardContent className="space-y-4">
+            {view === "completed" && order && <PurchasedApps productIds={order.items.map((i) => i.productId)} />}
             <div className="p-3 bg-muted rounded-md text-sm">
               <span className="font-medium">Reference:</span> {reference}
             </div>

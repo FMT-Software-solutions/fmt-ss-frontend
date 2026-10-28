@@ -1,6 +1,7 @@
 import {
   Building2,
   CalendarClock,
+  TicketPercent,
   ChartNoAxesColumn,
   LayoutDashboard,
   MessageSquare,
@@ -39,6 +40,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: 'Quotes', to: '/site/quotes', icon: Quote },
       { title: 'Purchases', to: '/site/purchases', icon: Receipt },
       { title: 'Payment plans', to: '/plans', icon: CalendarClock },
+      { title: 'Discount codes', to: '/site/discount-codes', icon: TicketPercent },
       { title: 'Reviews', to: '/site/reviews', icon: Star },
       { title: 'Newsletter', to: '/site/newsletter', icon: Newspaper },
       { title: 'Training', to: '/site/training', icon: GraduationCap },

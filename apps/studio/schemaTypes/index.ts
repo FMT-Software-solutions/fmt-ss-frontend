@@ -7,7 +7,6 @@ import systemRequirements from './systemRequirements';
 import training from './training';
 import trainingType from './trainingType';
 import event from './event';
-import discountCode from './discountCode';
 
 export const schemaTypes = [
   project,
@@ -19,5 +18,4 @@ export const schemaTypes = [
   training,
   trainingType,
   event,
-  discountCode,
 ];

@@ -10,6 +10,8 @@ interface PaystackPaymentProps {
   amount: number;
   productIds: string[];
   getBillingDetails: () => Promise<StoreBillingDetails | null>;
+  /** Already checked by the summary; the server applies it again. */
+  discountCode?: string;
   isValid?: boolean;
 }
 
@@ -19,7 +21,7 @@ const publicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "";
  * Pays a server-created order in the Paystack popup. The reference and amount
  * come from the server; on success the order page confirms with Paystack.
  */
-export function PaystackButton({ amount, productIds, getBillingDetails, isValid = true }: PaystackPaymentProps) {
+export function PaystackButton({ amount, productIds, getBillingDetails, discountCode, isValid = true }: PaystackPaymentProps) {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const initializePayment = usePaystackPayment({ publicKey });
@@ -35,7 +37,7 @@ export function PaystackButton({ amount, productIds, getBillingDetails, isValid 
 
     setBusy(true);
     try {
-      const order = await createStoreOrder({ productIds, billingDetails: billing, provider: "paystack" });
+      const order = await createStoreOrder({ productIds, billingDetails: billing, provider: "paystack", discountCode });
       if (order.provider !== "paystack") throw new Error("Unexpected payment provider");
       const name = [billing.firstName, billing.lastName].filter(Boolean).join(" ");
       initializePayment({
