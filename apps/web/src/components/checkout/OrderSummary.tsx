@@ -101,7 +101,7 @@ export function OrderSummary({ items, total, subtotal, isValid, getBillingDetail
                   <X className="h-3.5 w-3.5" />
                 </button>
               </span>
-              <span>− GHS {discount.amount.toFixed(2)}</span>
+              <span className="whitespace-nowrap">− GHS {discount.amount.toFixed(2)}</span>
             </div>
           )}
           {!discount && (
